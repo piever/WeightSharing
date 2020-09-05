@@ -34,8 +34,8 @@
 \newcommand{\pietro}[1]{\textcolor{teal}{#1}}
 \newcommand{\Ban}{{\mathbf{Ban}}}
 \newcommand{\Top}{{\mathbf{Top}}}
-\newcommand{\forget}{{\textnormal{forget}}}
-\newcommand{\free}{{\textnormal{free}}}
+\newcommand{\coforget}{{\textnormal{coforget}}}
+\newcommand{\cofree}{{\textnormal{cofree}}}
 \newcommand{\pt}{{\textnormal{pt}}}
 \newcommand{\Hom}{{\textnormal{Hom}}}
 \newcommand{\End}{{\textnormal{End}}}
@@ -47,9 +47,9 @@
 \newcommand{\Set}{{\mathbf{Set}}}
 \newcommand{\Mon}{{\mathbf{Mon}}}
 \newcommand{\Cat}{{\mathbf{C}}}
-\newcommand{\DCat}{{\mathbf{D}}}
 \newcommand{\JCat}{{\mathbf{J}}}
 \newcommand{\LCat}{{\mathbf{L}}}
+\newcommand{\QCat}{{\mathbf{Q}}}
 \newcommand{\range}[2]{{\{{#1}, \dots,{#2}\}}}
 \newcommand{\anon}{{\,\mbox{-}\,}}
 
@@ -67,66 +67,71 @@
 \begin{abstract}
 \end{abstract}
 
-\section{Architectures in sets}
-
-We begin by giving an abstract definition of {\em architecture}.
+\section{Architecture}
 
 \begin{definition}\label{def:architecture}
-    An {\em architecture} is a natural transformation from a comonad to an endofunctor. More explicitly, given a category $\DCat$, an {\em architecture} on $\DCat$ is composed of the following data:
-    \begin{itemize}
-        \item a comonad $T$ on $\DCat$,
-        \item an endofunctor $S \colon \DCat \rightarrow \DCat$,
-        \item a natural transformation $\eta \colon T \rightarrow S$.
-    \end{itemize}
-    % An architecture $(\DCat, T, S, \eta)$ is {\em valid} if the following conditions are met:
-    % \begin{itemize}
-    %     \item $\DCat$ has finite products,
-    %     \item for all $(X, +)$ commutative monoid in $\DCat$ \pietro{meglio introdurre la categoria lineare a parte}, and for all
-    %         \begin{equation*}
-    %             f \colon SX \rightarrow X,
-    %         \end{equation*}
-    %         the composition
-    %         \begin{equation*}
-    %             f \circ \eta_X \colon TX \rightarrow X
-    %         \end{equation*}
-    %         is a {\em machine}~\cite{2020arXiv200702777V} in the Kleisli category $\DCat_T$.
-    % \end{itemize}
+    Let $\Cat$ be a Cartesian closed category. An {\em architecture} is a Cartesian closed category $\Cat$ together with a comonad $T\colon \Cat \rightarrow \Cat$ that preserves finite products.
 \end{definition}
 
-This is sufficient to give notions of composability, equivariance, and locality. In the reminder of the section, we will first give a broad class of architectures. Then, we will consider a simpler special case and show that it is sufficient to recover, among other examples, classical recurrent and convolutional neural networks. Here we propose a simple technique to define architectures in the category of sets. The following section will generalize this construction to locally Cartesian closed categories.
+\pietro{Questo teorema e' noto ma credo valga la pena menzionarlo.}
 
 \begin{theorem}\label{thm:categorical_architecture}
-    Let $\JCat$ be a small category. Let $\tilde M \subseteq \Morph(\JCat)$ be a subset of morphisms. $\JCat$ and $\tilde M$ induce an architecture on $\Set$, which we call a {\em categorical architecture}. 
+    Let $\QCat$ be a locally Cartesian closed category. Then, there is a well defined notion of category {\em internal} to $\QCat$~\cite{mac2013categories}.
+    Let $\JCat = s, t \colon C_1 \rightarrow C_0$ be such an internal category. $\JCat$ induces an architecture
+    \begin{equation*}
+        s_!t^*\colon \QCat/C_0 \rightarrow \QCat/C_0.
+    \end{equation*}
 \end{theorem}
 
 \begin{proof}
-    Let $s, t\colon M \rightarrow O$ be the source and target maps from the set of morphisms $M$ to the set of objects $O$. Then $t_*s^*\colon \Set/O \rightarrow \Set/O$ is a monad~\cite[Thm.~V.8.2]{Mac_Lane_1994}. As $\Set$ is locally Cartesian closed, $s^*$ has a right adjoint $s_!$, hence we can consider $s_!t^*$. As $T = s_!t^*$ is the right adjoint of the monad $t_*s^*$, it is a comonad. $T$ can be spelled out explicitly as follows. Given a map of sets $p\colon E \rightarrow O$, we have
-    \begin{equation*}
-        TE = \coprod_{o \in O} \, \, \prod_{m \in t^{-1}(o)} p^{-1}(s(m))
-    \end{equation*}
-    equipped with the obvious map $TE \rightarrow O$.
-    We can then define
-    \begin{equation*}
-        SE = \coprod_{o \in O} \, \, \prod_{m \in t^{-1}(o)\cap \tilde M} p^{-1}(s(m)).
-    \end{equation*}
-    Projections on the product induce a natural transformation $\eta\colon T\ \rightarrow S$.
+    The map $t_*s^*\colon \QCat/C_0 \rightarrow \QCat/C_0$ is a monad~\cite[Thm.~V.8.2]{Mac_Lane_1994}. As $\QCat$ is locally Cartesian closed, $s^*$ has a right adjoint $s_!$, hence we can consider $s_!t^*$. As $T = s_!t^*$ is the right adjoint of the monad $t_*s^*$, it is a comonad. Being a right adjoint, $T$ preserves finite products.
 \end{proof}
 
-Let $(P, \preceq)$ be a preorder, and let $F\colon P^{op} \rightarrow \Mon$ be a contravariant functor from $P$ to the category of monoids. Then they induce a small category with
+Let $T$ be an architecture on $\Cat$.
+We can consider two distinct categories, $\Cat^T$ and $\Cat_T$, the Eilenberg-Moore and Kleisli categories for the comonad $T$, respectively.
+
+\begin{theorem}\label{thm:cartesian_kleisli}
+    Let $T\colon \Cat \rightarrow \Cat$ be an architecture. Then both $\Cat_T$ and $\Cat^T$ have finite products, and all functors
+    \begin{equation*}
+        \Cat_T \rightarrow \Cat^T \rightarrow T
+    \end{equation*}
+    preserve them. Furthermore $\Cat_T$ is Cartesian closed and it is powered over $\Cat^T$. Given a coalgebra $M$ and a cofree coalgebra $\cofree(X)$, we denote this operation
+    \begin{equation*}
+        \pitchfork(M, \cofree(X)) \simeq \cofree\left([\coforget(M), X]\right).
+    \end{equation*}
+    \pietro{Forse addirittura rimuovendo $C_T$ si puo' fare power in $C$ direttamente.}
+\end{theorem}
+
+\section{Equivariance}
+
+\pietro{TODO: do with power!}
+
+One of the key reasons for the success of neural networks is the notion of {\em weight sharing}. In its simplest form, one can consider, among maps $[M, X] \rightarrow [M, X]$, those that originate from maps $[M, X] \rightarrow X$. Indeed, given
 \begin{equation*}
-    \Hom(p, q) = \begin{cases}
-        P(p) &\text{ if } p \preceq q,\\
-        \emptyset &\text{ otherwise.}
-    \end{cases}
+    {\cal F} \colon [M, X] \rightarrow X,
 \end{equation*}
-\pietro{Spiegare che $F$ contiene gli endomorfismi sopra ogni oggetto, ma anche un modo per spostarsi.}
+one can consider the map
+\begin{align*}
+    \widehat{\cal F} \colon [M, X] &\rightarrow [M, X] \\
+    \left(\widehat{\cal F}\phi\right)(m) &= {\cal F}(a \mapsto \phi(ma)).
+\end{align*}
 
-\section{Architectures in quasitopoi}
+This simple notion of weight sharing does not seem sufficient to cover complex neural networks, made up of several nodes, each with their own symmetries, which interact with each other in non-trivial ways.
 
-Same as above but in an arbitrary quasitopos.
-\Cref{thm:categorical_architecture} holds as is, with internal categories in the quasitopos. Monoids becomes $F \rightarrow O \in \Cat/O$. Preorder is $R \subseteq O \times O$ (strong mono). $R$ induces a monad on $\Cat/O$ (always~\cite[Thm.~V.8.2]{Mac_Lane_1994}). We need an algebra in $\Mon(\Cat/O)$ for that monad. It is a bit worrying that it does not preserve products.
+We aim to show that the simple notion of weight sharing defined above is sufficient to recover, among other examples, classical recurrent and convolutional neural networks. However, to do so, we will need to generalize not the weight sharing strategy, but rather the underlying category on which such strategy takes place.
 
-As examples, distance spaces, sequential spaces, etc.
+\section{Locality}
+
+\pietro{Fai la localita' in termini di sottoggetti di M. Funziona?}
+
+% \section{Architectures in quasitopoi}
+
+% Same as above but in an arbitrary quasitopos.
+% \Cref{thm:categorical_architecture} holds as is, with internal categories in the quasitopos. Monoids becomes $F \rightarrow O \in \Cat/O$. Preorder is $R \subseteq O \times O$ (strong mono). $R$ induces a monad on $\Cat/O$ (always~\cite[Thm.~V.8.2]{Mac_Lane_1994}). We need an algebra in $\Mon(\Cat/O)$ for that monad. It is a bit worrying that it does not preserve products.
+
+% Even better, take the slice category already as quasitopos! Then you need a monoid and a monad. Much easier! $F$ should be a monoid in the category of coalgebras for the category $R$.
+
+% As examples, distance spaces, sequential spaces, etc.
 
 \section{Comonadic machines}
 
