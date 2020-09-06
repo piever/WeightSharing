@@ -34,8 +34,6 @@
 \newcommand{\pietro}[1]{\textcolor{teal}{#1}}
 \newcommand{\Ban}{{\mathbf{Ban}}}
 \newcommand{\Top}{{\mathbf{Top}}}
-\newcommand{\coforget}{{\textnormal{coforget}}}
-\newcommand{\cofree}{{\textnormal{cofree}}}
 \newcommand{\pt}{{\textnormal{pt}}}
 \newcommand{\Hom}{{\textnormal{Hom}}}
 \newcommand{\End}{{\textnormal{End}}}
@@ -45,9 +43,8 @@
 \newcommand{\id}{{\textnormal{id}}}
 \newcommand{\Morph}{{\textnormal{Morph}}}
 \newcommand{\Set}{{\mathbf{Set}}}
-\newcommand{\Mon}{{\mathbf{Mon}}}
 \newcommand{\Cat}{{\mathbf{C}}}
-\newcommand{\JCat}{{\mathbf{J}}}
+\newcommand{\JCat}{{\mathcal{J}}}
 \newcommand{\LCat}{{\mathbf{L}}}
 \newcommand{\QCat}{{\mathbf{Q}}}
 \newcommand{\range}[2]{{\{{#1}, \dots,{#2}\}}}
@@ -57,7 +54,7 @@
 \Crefname{diagram}{Diagram}{Diagrams}
 \creflabelformat{diagram}{#2(#1)#3}
 
-\title{Weight sharing via dependent products}
+\title{Weight sharing via comonads}
 \author{
     Pietro Vertechi \and Mattia G. Bergomi
 }
@@ -70,7 +67,7 @@
 \section{Architecture}
 
 \begin{definition}\label{def:architecture}
-    Let $\Cat$ be a Cartesian closed category. An {\em architecture} is a Cartesian closed category $\Cat$ together with a comonad $T\colon \Cat \rightarrow \Cat$ that preserves finite products.
+    An {\em architecture} is a closed monoidal category $(\Cat, \otimes)$, together with a monoidal comonad $T\colon \Cat \rightarrow \Cat$.
 \end{definition}
 
 \pietro{Questo teorema e' noto ma credo valga la pena menzionarlo.}
@@ -87,24 +84,29 @@
     The map $t_*s^*\colon \QCat/C_0 \rightarrow \QCat/C_0$ is a monad~\cite[Thm.~V.8.2]{Mac_Lane_1994}. As $\QCat$ is locally Cartesian closed, $s^*$ has a right adjoint $s_!$, hence we can consider $s_!t^*$. As $T = s_!t^*$ is the right adjoint of the monad $t_*s^*$, it is a comonad. Being a right adjoint, $T$ preserves finite products.
 \end{proof}
 
-Let $T$ be an architecture on $\Cat$.
-We can consider two distinct categories, $\Cat^T$ and $\Cat_T$, the Eilenberg-Moore and Kleisli categories for the comonad $T$, respectively.
+\pietro{Discutere ultima comonade di \cite{uustalu_comonadic_2008} come caso particolare.}
 
-\begin{theorem}\label{thm:cartesian_kleisli}
-    Let $T\colon \Cat \rightarrow \Cat$ be an architecture. Then both $\Cat_T$ and $\Cat^T$ have finite products, and all functors
+Let $T$ be an architecture on a closed monoidal category $(\Cat, \otimes)$. Let $\Cat^T$ be Eilenberg-Moore category for the comonad $T$. It is a known fact~\cite{Moerdijk_2002,pastro2009closed} that the monoidal structure on $\Cat$ lifts to a monoidal structure on $\Cat^T$ in such a way that the forgetful functor $U\colon \Cat^T \rightarrow \Cat$ is strict monoidal.
+
+\begin{theorem}\label{thm:cofree_exponentiating}
+    Let $T\colon \Cat \rightarrow \Cat$ be an architecture. Then cofree coalgebras in $\Cat^T$ are exponentiating. In particular, let $F\colon \Cat \rightarrow \Cat^T$ denote the cofree functor. Then, there exist a natural isomorphism
     \begin{equation*}
-        \Cat_T \rightarrow \Cat^T \rightarrow T
+        \Hom(A\otimes B, FX) \simeq \Hom(A, F[UB, X]).
     \end{equation*}
-    preserve them. Furthermore $\Cat_T$ is Cartesian closed and it is powered over $\Cat^T$. Given a coalgebra $M$ and a cofree coalgebra $\cofree(X)$, we denote this operation
-    \begin{equation*}
-        \pitchfork(M, \cofree(X)) \simeq \cofree\left([\coforget(M), X]\right).
-    \end{equation*}
-    \pietro{Forse addirittura rimuovendo $C_T$ si puo' fare power in $C$ direttamente.}
 \end{theorem}
 
-\section{Equivariance}
+\begin{proof}
+    By a straightforward computation:
+    \begin{align*}
+        \Hom_{\Cat^T}(A\otimes B, FX)
+        &\simeq \Hom_{\Cat}(U(A \otimes B), X)\\
+        &\simeq \Hom_{\Cat}(UA \otimes UB, X)\\
+        &\simeq \Hom_{\Cat}(UA, [UB, X])\\
+        &\simeq \Hom_{\Cat^T}(A, F[UB, X]).
+    \end{align*}
+\end{proof}
 
-\pietro{TODO: do with power!}
+\section{Equivariance}
 
 One of the key reasons for the success of neural networks is the notion of {\em weight sharing}. In its simplest form, one can consider, among maps $[M, X] \rightarrow [M, X]$, those that originate from maps $[M, X] \rightarrow X$. Indeed, given
 \begin{equation*}
@@ -120,18 +122,26 @@ This simple notion of weight sharing does not seem sufficient to cover complex n
 
 We aim to show that the simple notion of weight sharing defined above is sufficient to recover, among other examples, classical recurrent and convolutional neural networks. However, to do so, we will need to generalize not the weight sharing strategy, but rather the underlying category on which such strategy takes place.
 
+Here, we consider how to define a notion of equivariance given an architecture $T\colon\Cat \rightarrow \Cat$.
+
+\begin{theorem}\label{thm:weight_sharing}
+    Let $M \in \Cat^T$ be a monoid. Then $M$ induces a comonad:
+    \begin{equation*}
+        X \mapsto T[UM, X].
+    \end{equation*}
+\end{theorem}
+
+\begin{proof}
+    \pietro{Use $F[UM, X]$ and Kleisli category. Attenzione: Kleisli non ha per forza un prodotto tensore.} Monoidal functor
+    \begin{equation*}
+        \left(\Cat^T\right)^{op} \rightarrow \Fun(\Cat_T, \Cat_T),
+    \end{equation*}
+    hence monoid goes to comonad. That, and free forget from Kleisli to $\Cat$.
+\end{proof}
+
 \section{Locality}
 
-\pietro{Fai la localita' in termini di sottoggetti di M. Funziona?}
-
-% \section{Architectures in quasitopoi}
-
-% Same as above but in an arbitrary quasitopos.
-% \Cref{thm:categorical_architecture} holds as is, with internal categories in the quasitopos. Monoids becomes $F \rightarrow O \in \Cat/O$. Preorder is $R \subseteq O \times O$ (strong mono). $R$ induces a monad on $\Cat/O$ (always~\cite[Thm.~V.8.2]{Mac_Lane_1994}). We need an algebra in $\Mon(\Cat/O)$ for that monad. It is a bit worrying that it does not preserve products.
-
-% Even better, take the slice category already as quasitopos! Then you need a monoid and a monad. Much easier! $F$ should be a monoid in the category of coalgebras for the category $R$.
-
-% As examples, distance spaces, sequential spaces, etc.
+\pietro{Fai la localita' in termini di sottoggetti di M o qualcosa di simile. Funziona?}
 
 \section{Comonadic machines}
 
