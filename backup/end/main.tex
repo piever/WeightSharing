@@ -1,0 +1,179 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage{amssymb}
+\usepackage{bbm}
+
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+\usepackage{url}
+
+%%% For figures
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+
+%%% For tables
+\usepackage[table]{xcolor}
+
+%specifying table and figure packages
+\usepackage{caption}
+
+\usepackage[T1]{fontenc}
+\usepackage[all]{xy}
+\usepackage[inline]{enumitem}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+
+\newcommand{\mattia}[1]{\textcolor{cyan}{#1}}
+\newcommand{\pietro}[1]{\textcolor{teal}{#1}}
+\newcommand{\Ban}{{\mathbf{Ban}}}
+\newcommand{\Top}{{\mathbf{Top}}}
+\newcommand{\forget}{{\textnormal{forget}}}
+\newcommand{\free}{{\textnormal{free}}}
+\newcommand{\pt}{{\textnormal{pt}}}
+\newcommand{\Hom}{{\textnormal{Hom}}}
+\newcommand{\End}{{\textnormal{End}}}
+\newcommand{\Fun}{{\textnormal{Fun}}}
+\newcommand{\Aut}{{\textnormal{Aut}}}
+\newcommand{\Obj}{{\textnormal{Obj}}}
+\newcommand{\id}{{\textnormal{id}}}
+\newcommand{\Morph}{{\textnormal{Morph}}}
+\newcommand{\Set}{{\mathbf{Set}}}
+\newcommand{\Cat}{{\mathbf{C}}}
+\newcommand{\DCat}{{\mathbf{D}}}
+\newcommand{\ICat}{{\mathbf{I}}}
+\newcommand{\JCat}{{\mathbf{J}}}
+\newcommand{\LCat}{{\mathbf{L}}}
+\newcommand{\range}[2]{{\{{#1}, \dots,{#2}\}}}
+\newcommand{\anon}{{\,\mbox{-}\,}}
+
+\crefname{diagram}{diag.}{diags.}
+\Crefname{diagram}{Diagram}{Diagrams}
+\creflabelformat{diagram}{#2(#1)#3}
+
+\title{Comonadic neural network architectures}
+\author{
+    Pietro Vertechi \and Mattia G. Bergomi
+}
+\date{}
+\begin{document}
+\maketitle
+\begin{abstract}
+\end{abstract}
+
+\section{Architecture}
+
+We begin by giving an abstract definition of {\em architecture}. \pietro{Non so se vogliamo questa come definizione, oppure se prendere come definizione le ipotesi di \cref{thm:kan_architecture}.}
+
+\begin{definition}\label{def:architecture}
+    An {\em architecture} is a natural transformation from a comonad to an endofunctor. More explicitly, given a category $\DCat$, an {\em architecture} on $\DCat$ is composed of the following data:
+    \begin{itemize}
+        \item a comonad $T$ on $\DCat$,
+        \item an endofunctor $S \colon \DCat \rightarrow \DCat$,
+        \item a natural transformation $\eta \colon T \rightarrow S$.
+    \end{itemize}
+\end{definition}
+
+% An architecture $(\DCat, T, S, \eta)$ is {\em valid} if the following conditions are met:
+% \begin{itemize}
+%     \item $\DCat$ has finite products,
+%     \item for all $(X, +)$ commutative monoid in $\DCat$ \pietro{meglio introdurre la categoria lineare a parte}, and for all
+%           \begin{equation*}
+%               f \colon SX \rightarrow X,
+%           \end{equation*}
+%           the composition
+%           \begin{equation*}
+%               f \circ \eta_X \colon TX \rightarrow X
+%           \end{equation*}
+%           is a {\em machine}~\cite{2020arXiv200702777V} in the Kleisli category $\DCat_T$.
+% \end{itemize}
+
+\pietro{Da discutere il caso continuo (interpretazione comonadica di macchine di Volterra). Probabilmente da fare con enriched category theory.}
+
+This is sufficient to give notions of composability, equivariance, and locality. In the reminder of the section, we will first give a broad class of architectures. Then, we will consider a simpler special case and show that it is sufficient to recover, among other examples, classical recurrent and convolutional neural networks.
+
+Option: drop this and do it for a diagram
+\begin{equation*}
+    M \rightarrow C_1 \rightrightarrows C_0.
+\end{equation*}
+
+\begin{theorem}\label{thm:kan_architecture}
+    Let $p\colon \ICat \rightarrow \JCat$ be a functor between small categories. Let $H$ be a subfunctor of the composition
+    \begin{equation*}
+        \ICat^{op} \times \ICat \xrightarrow{p \times p}
+        \JCat^{op} \times \JCat \xrightarrow{\Hom} \Set.
+    \end{equation*}
+    Let $\Cat$ be a complete category. Then, $p$ and $H$ induce an architecture on $\Cat^\ICat$, which we call a {\em Kan architecture}.
+\end{theorem}
+
+\begin{proof}
+    $p$ induces a functor $p^* \colon \Cat^\JCat \rightarrow \Cat^\ICat$, given by pre-composition. As $\Cat$ is complete, $p^*$ admits a right adjoint $p_* \colon \Cat^\JCat \rightarrow \Cat^\ICat$, its {\em right Kan extension}~\cite[Chapt.~X]{mac2013categories}. This adjunction $p^* \dashv p_*$ induces a comonad
+    \begin{equation*}
+        T := p^*p_* \colon \Cat^\ICat \rightarrow \Cat^\ICat.
+    \end{equation*}
+    Given $i \in \Obj(\ICat)$, $T(i)$ can be described explicitly using the {\em end} formula,~\cite[Eq.~X.4.3]{mac2013categories}, which we report here in our notation for a functor $F \colon \ICat \rightarrow \Cat$:
+    \begin{equation}\label{eq:endformula}
+        p_* F = \int_i F(i)^{\Hom(\anon, p(i))}.
+    \end{equation}
+    The integral represents an {\em end}~\cite[Sect.~IX.5]{mac2013categories} over the category $\ICat$. From~\cref{eq:endformula} we can deduce that,
+    \begin{equation}\label{eq:comonad_endformula}
+        T F = \int_i F(i)^{\Hom(p(\anon), p(i))}.
+    \end{equation}
+    We then define
+    \begin{equation}\label{eq:functor_endformula}
+        S F := \int_i F(i)^{H(\anon, i)},
+    \end{equation}
+    where $S F$ is a functor, as $H$ is closed by pre-composition of morphisms in the image of $p$. By functoriality of end, the inclusion $H \hookrightarrow \Hom \circ p \times p$ gives us a natural transformation
+    \begin{equation*}
+        \eta \colon T \rightarrow S.
+    \end{equation*}
+\end{proof}
+
+\subsection{Simple Kan architecture}
+
+\Cref{thm:kan_architecture} gives an explicit example of architecture that is still somewhat complex. Let us consider a particular case. Let  $p\colon J \hookrightarrow \JCat$ be the underlying discrete subcategory, having the same objects as $\JCat$, but only identity morphisms. In this scenario, \cref{thm:kan_architecture} simplifies greatly. In particular, $H(i, j)$ can simply be written as $\Hom_\JCat(i, j) \cap M$, for some $M \subseteq \Morph(\JCat)$. Furthermore, ends over discrete categories are just products, so~\cref{eq:comonad_endformula,eq:functor_endformula} become:
+\begin{equation}\label{eq:productformula}
+    T G = \prod_{j \in J} G(j)^{\Hom_\JCat(\anon, j)}
+    \quad\text{ and }\quad
+    S G = \prod_{j \in J} G(j)^{Hom_\JCat(\anon, j) \cap M}.
+\end{equation}
+This result is summarized in the following theorem.
+
+\begin{theorem}\label{thm:discrete_kan_architecture}
+    Let $\JCat$ be a small category, and let $J = \Obj(\JCat)$ be its underlying discrete category. Let $M \subseteq \Morph(\JCat)$ be a subset of morphisms in $\JCat$. Let $\Cat$ be a category with small products. Then $\JCat$ and $M$ induce an architecture on $\Cat^J$.
+\end{theorem}
+
+\begin{proof}
+    The comonad and functor are given by~\cref{eq:productformula}.
+\end{proof}
+
+\section{Comonadic machines}
+
+Show how it's possible to obtain a machine from an architecture.
+
+\section{Compactly-generated Hausdorff spaces}
+
+
+
+\section{Recurrent and convolutional neural networks}
+
+Monoids can be considered as categories with one object. Let us consider the category corresponding to $\mathbb N$. Let $M$ be the set containing only the generator morphism. Then the above construction recovers recurrent neural networks. Analogously, considering $\mathbb N \times \mathbb N$ we obtain convolutional neural networks, where $M$ denotes the shape of the filter.
+\pietro{TODO: mention 2 objects for conv, and strides!}
+\pietro{Maybe also do functors, to generalize GENEO? Somehow discuss continuous version?}
+
+\section{Novel architectures}
+
+Here, we explore the scenario where the category $\Cat$ has more than one object.
+\pietro{TODO: figure out a good application.}
+\pietro{Mention partial symmetries because of non-composability.}
+
+\bibliographystyle{abbrv}
+\bibliography{References}
+
+\end{document}
