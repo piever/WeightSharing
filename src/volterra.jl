@@ -40,7 +40,6 @@ volterra(K, G, g, mesh, n)
 
 using BenchmarkTools
 @benchmark volterra($K, $G, $g, $mesh, $n)
-using ProfileView
-ProfileView.@profview for i in 1:100
+@profview for i in 1:1_000
     volterra(K, G, g, mesh, n)
 end
