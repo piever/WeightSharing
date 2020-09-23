@@ -1,4 +1,8 @@
-using ChainRulesCore, ForwardDiff
+using ChainRulesCore: NO_FIELDS, DoesNotExist
+import ChainRulesCore: rrule
+using ChainRulesTestUtils: rrule_test
+using ForwardDiff: derivative
+using Random, LinearAlgebra
 
 function clean!(weights, rgs)
     N = length(rgs)
@@ -13,13 +17,14 @@ clean(weights, rgs) = clean!(copy(weights), rgs)
 
 apply(f, x) = f(x)
 
-function update!(z, σ, x, rg)
-    z[rg, :] .= apply.(σ, x[rg, :])
-    return
+struct Multiplier{T}
+    x::T
 end
 
-function update!(z, σ::AbstractArray{<:Number}, x, rg)
-    z[rg, :] .= σ[rg, :] .* x[rg, :]
+(m::Multiplier)(val) = m.x * val
+
+function update!(z, σ, x, rg)
+    z[rg, :] .= apply.(σ[rg, :], x[rg, :])
     return
 end
 
@@ -37,11 +42,11 @@ function compute_z(σ, weights, bias, rgs)
     return z
 end
 
-function ChainRulesCore.rrule(::typeof(compute_z), σ, weights, bias, rgs)
+function rrule(::typeof(compute_z), σ, weights, bias, rgs)
     wts = clean(weights, rgs)
     x, z = compute_xz(σ, wts, bias, rgs)
     function pullback_z(z̄)
-        J = ForwardDiff.derivative.(σ, x)
+        J = Multiplier.(derivative.(σ, x))
         _, res = compute_xz(J, permutedims(wts), z̄, reverse(rgs))
         NO_FIELDS, DoesNotExist(), clean(res * z', rgs), res, DoesNotExist()
     end
@@ -50,22 +55,14 @@ end
 
 ##
 
-using FiniteDiff: finite_difference_gradient
+using FillArrays
 
 weights = rand(30, 30)
 bias = rand(30, 100)
 rgs = [10i+1:10i+10 for i in 0:2]
+σ = Fill(tanh, size(bias))
 
-x, z = compute_xz(tanh, weights, bias, rgs)
-val, back = rrule(compute_z, tanh, weights, bias, rgs)
-
+x, z = compute_xz(σ, weights, bias, rgs)
 z̄ = rand(30, 100)
-_, _, a, b, _ = back(z̄)
 
-l = finite_difference_gradient(weights) do weights
-    dot(z̄, compute_z(tanh, weights, bias, rgs))
-end
-
-l - a
-
-rrule_test(compute_z, z̄, (tanh, nothing), (weights, randn(size(weights)...)), (bias, randn(size(bias)...)), (rgs, nothing))
+rrule_test(compute_z, z̄, (σ, nothing), (weights, randn(size(weights)...)), (bias, randn(size(bias)...)), (rgs, nothing))
