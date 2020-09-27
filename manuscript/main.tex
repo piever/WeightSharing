@@ -32,6 +32,7 @@
 
 \newcommand{\mattia}[1]{\textcolor{cyan}{#1}}
 \newcommand{\pietro}[1]{\textcolor{teal}{#1}}
+\newcommand{\N}{{\mathbb{N}}}
 \newcommand{\Ban}{{\mathbf{Ban}}}
 \newcommand{\Top}{{\mathbf{Top}}}
 \newcommand{\pt}{{\textnormal{pt}}}
@@ -68,97 +69,55 @@
 
 \section{Architecture}
 
-We begin by giving an abstract definition of {\em architecture}.
 
-\begin{definition}\label{def:architecture}
-    Let $(\Cat, \otimes)$ be a closed monoidal category.
-    An {\em architecture} on $(\Cat, \otimes)$ is composed of the following data:
-    \begin{itemize}
-        \item a monoidal comonad $T$ on $\Cat$,
-        \item an endofunctor $S \colon \Cat \rightarrow \Cat$,
-        \item a natural transformation $\eta \colon T \rightarrow S$.
-    \end{itemize}
+\begin{definition}\label{def:cartesian_category}
+    We say that a category is {\em Cartesian} if it has finite products. We say that a functor between Cartesian categories is Cartesian if it preserves finite products.
 \end{definition}
 
-% \begin{definition}\label{def:locality_constraint}
-%     A {\em locality constraint} on a an architecture $T$ is a natural transformation from $T$ to an endofunctor. More explicitly, given an architecture $T\colon \Cat \rightarrow \Cat$, a {\em locality constraint} is an endofunctor $S \colon \Cat \rightarrow \Cat$ together with a natural transformation $\eta \colon T \rightarrow S$.
-% \end{definition}
+\begin{definition}\label{def:nilpotent_functor}
+    A functor $T$ is {\em nilpotent} if there exists $n \in \N$ such that the composed functor $T^n$ maps all objects to the terminal object.
+\end{definition}
 
-% \begin{definition}\label{def:validarchitecture}
-%     Let us assume that $\Cat$ has finite products, and let $\iota \colon \LCat \rightarrow \Cat$ be a product-preserving forgetful functor, with $\LCat$ an additive category.
-%     We say that an architecture is {\em valid} if, for all $X = \iota(M)$, with $M \in \Obj(\LCat)$, and for all $f \colon SX \rightarrow X$, the composition $f \circ \eta_X \colon TX \rightarrow X$ is a {\em machine}~\cite{2020arXiv200702777V} in the Kleisli category $\Cat_T$.
-% \end{definition}
+We begin by giving an abstract definition of {\em nilpotent architecture}.
 
-\pietro{Da discutere il caso continuo (interpretazione comonadica di macchine di Volterra). Probabilmente da fare con enriched category theory.}
+\begin{definition}\label{def:nilpotent_architecture}
+    Let $\Cat$ be a Cartesian category. A {\em nilpotent architecture} is a nilpotent Cartesian endofunctor $T \colon \Cat \rightarrow \Cat$.
+\end{definition}
+
 This is sufficient to give notions of composability, weight sharing, and locality. In the reminder of the section, we will first give a broad class of architectures. Then, we will consider a simpler special case and show that it is sufficient to recover, among other examples, classical recurrent and convolutional neural networks.
 
 \subsection{Examples}
 
-\pietro{Da semplificare un pochino, e iniziare con un esempio più semplice e concreto.}
-
-\begin{theorem}\label{thm:kan_architecture}
-    Let $p\colon \ICat \rightarrow \JCat$ be a functor between small categories. Let $H$ be a subfunctor of the composition
-    \begin{equation*}
-        \ICat^{op} \times \ICat \xrightarrow{p \times p}
-        \JCat^{op} \times \JCat \xrightarrow{\Hom} \Set.
-    \end{equation*}
-    Let $\Cat$ be a complete category. Then, $p$ and $H$ induce an architecture on $\Cat^\ICat$, which we call a {\em Kan architecture}.
-\end{theorem}
+\begin{proposition}\label{prop:graph_architecture}
+    Let $(E, V)$ be a directed acyclic graph. Let $\DCat$ be a Cartesian category. The functor
+    \begin{align*}
+        T \colon \DCat^V &\rightarrow \DCat^V \\
+        (T X)(v) &= \prod_{u \in in(v)} X(u),  
+    \end{align*}
+    where $in(v)$ is the set of incoming neighbors of $v$, is a nilpotent architecture.
+\end{proposition}
 
 \begin{proof}
-    $p$ induces a functor $p^* \colon \Cat^\JCat \rightarrow \Cat^\ICat$, given by pre-composition. As $\Cat$ is complete, $p^*$ admits a right adjoint $p_* \colon \Cat^\JCat \rightarrow \Cat^\ICat$, its {\em right Kan extension}~\cite[Chapt.~X]{mac2013categories}. This adjunction $p^* \dashv p_*$ induces a comonad
-    \begin{equation*}
-        T := p^*p_* \colon \Cat^\ICat \rightarrow \Cat^\ICat.
-    \end{equation*}
-    Given $i \in \Obj(\ICat)$, $T(i)$ can be described explicitly using the {\em end} formula,~\cite[Eq.~X.4.3]{mac2013categories}, which we report here in our notation for a functor $F \colon \ICat \rightarrow \Cat$:
-    \begin{equation}\label{eq:endformula}
-        p_* F = \int_i F(i)^{\Hom(\anon, p(i))}.
-    \end{equation}
-    The integral represents an {\em end}~\cite[Sect.~IX.5]{mac2013categories} over the category $\ICat$. From~\cref{eq:endformula} we can deduce that,
-    \begin{equation}\label{eq:comonad_endformula}
-        T F = \int_i F(i)^{\Hom(p(\anon), p(i))}.
-    \end{equation}
-    We then define
-    \begin{equation}\label{eq:functor_endformula}
-        S F := \int_i F(i)^{H(\anon, i)},
-    \end{equation}
-    where $S F$ is a functor, as $H$ is closed by pre-composition of morphisms in the image of $p$. By functoriality of end, the inclusion $H \hookrightarrow \Hom \circ p \times p$ gives us a natural transformation
-    \begin{equation*}
-        \eta \colon T \rightarrow S.
-    \end{equation*}
+    It is straightforward to verify that $T$ preserves finite products. Let $n$ be such that there are no paths of length $n$ in $(V, E)$. Then $T^n X$ is the terminal object.
 \end{proof}
 
-\Cref{thm:kan_architecture} gives an explicit example of architecture that is still somewhat complex. Let us consider a particular case. Let  $p\colon J \hookrightarrow \JCat$ be the underlying discrete subcategory, having the same objects as $\JCat$, but only identity morphisms. In this scenario, \cref{thm:kan_architecture} simplifies greatly. In particular, $H(i, j)$ can simply be written as $\Hom_\JCat(i, j) \cap M$, for some $M \subseteq \Morph(\JCat)$. Furthermore, ends over discrete categories are just products, so~\cref{eq:comonad_endformula,eq:functor_endformula} become:
-\begin{equation}\label{eq:productformula}
-    T G = \prod_{j \in J} G(j)^{\Hom_\JCat(\anon, j)}
-    \quad\text{ and }\quad
-    S G = \prod_{j \in J} G(j)^{Hom_\JCat(\anon, j) \cap M}.
-\end{equation}
-This result is summarized in the following theorem.
-
-\begin{theorem}\label{thm:discrete_kan_architecture}
-    Let $\JCat$ be a small category, and let $J = \Obj(\JCat)$ be its underlying discrete category. Let $M \subseteq \Morph(\JCat)$ be a subset of morphisms in $\JCat$. Let $\Cat$ be a category with small products. Then $\JCat$ and $M$ induce an architecture on $\Cat^J$.
-\end{theorem}
+\Cref{prop:graph_architecture} has a continuous analogue in locally Cartesian closed categories.
+\begin{proposition}\label{[prop]:categorical_architecture}
+    Let $\QCat$ be a locally Cartesian closed category. Let $s, t\colon E \rightarrow V$ be two parallel arrows. Let us assume that there exists $n \in \N$ such that the iterated pullback
+    \begin{equation}\label{eq:nilpotent_left_adjoint}
+       \underbrace{E \times_V E \times_V \dots \times_V E}_{n \text{ factors}}
+    \end{equation}
+    is initial in $\QCat/V$.
+    Then
+    \begin{equation*}
+        s_!t^*\colon \QCat/V \rightarrow \QCat/V
+    \end{equation*}
+    is a nilpotent architecture on $\QCat/V$.
+\end{proposition}
 
 \begin{proof}
-    The comonad and functor are given by~\cref{eq:productformula}.
+    The functor $s_!t^*$ is the right adjoint of  $t_*s^*\colon \QCat/C_0 \rightarrow \QCat/C_0$, and therefore it is Cartesian. By~\cref{eq:nilpotent_left_adjoint}, $(t_*s^*)^n$ maps all objects to the initial object, so its adjoint $(s_!t^*)^n$ maps all objects to the terminal object.
 \end{proof}
-
-\pietro{Questo teorema e' noto ma credo valga la pena menzionarlo.}
-
-\begin{theorem}\label{thm:categorical_architecture}
-    Let $\QCat$ be a locally Cartesian closed category. Then, there is a well defined notion of category {\em internal} to $\QCat$~\cite{mac2013categories}.
-    Let $\JCat = s, t \colon C_1 \rightarrow C_0$ be such an internal category. $\JCat$ induces an architecture
-    \begin{equation*}
-        s_!t^*\colon \QCat/C_0 \rightarrow \QCat/C_0.
-    \end{equation*}
-\end{theorem}
-
-\begin{proof}
-    The map $t_*s^*\colon \QCat/C_0 \rightarrow \QCat/C_0$ is a monad~\cite[Thm.~V.8.2]{Mac_Lane_1994}. As $\QCat$ is locally Cartesian closed, $s^*$ has a right adjoint $s_!$, hence we can consider $s_!t^*$. As $T = s_!t^*$ is the right adjoint of the monad $t_*s^*$, it is a comonad. Being a right adjoint, $T$ preserves finite products.
-\end{proof}
-
-\pietro{Discutere ultima comonade di \cite{uustalu_comonadic_2008} come caso particolare.}
 
 \section{Weight sharing}
 
@@ -176,21 +135,30 @@ This simple notion of weight sharing does not seem sufficient to cover complex n
 
 We aim to show that the simple notion of weight sharing defined above is sufficient to recover, among other examples, classical recurrent and convolutional neural networks. However, to do so, we will need to generalize not the weight sharing strategy, but rather the underlying category on which such strategy takes place.
 
-Here, we consider how to define a notion of weight sharing given an architecture $T\colon\Cat \rightarrow \Cat$. Let $T$ be an architecture on a closed monoidal category $(\Cat, \otimes)$. Let $\Cat^T$ be Eilenberg-Moore category for the comonad $T$. It is a known fact~\cite{Moerdijk_2002,pastro2009closed} that the monoidal structure on $\Cat$ lifts to a monoidal structure on $\Cat^T$ in such a way that the forgetful functor $U\colon \Cat^T \rightarrow \Cat$ is strict monoidal.
+Here, we consider how to define a notion of weight sharing given a nilpotent architecture $T\colon\Cat \rightarrow \Cat$. Let $T$ be a nilpotent architecture on a Cartesian closed category $\Cat$. Let $\Cat^T$ be category of coalgebras for the functor $T$. $\Cat^T$ also has finite products given by
+\begin{equation*}
+    \prod_{i=1}^k A_i \rightarrow \prod_{i=1}^k T A_i \simeq T \prod_{i=1}^k A_i.
+\end{equation*}
+The coforgetful functor $U\colon \Cat^T \rightarrow \Cat$ has a right adjoint
+\begin{align*}
+    F \colon \Cat &\rightarrow \Cat^T\\
+    X &\mapsto X \times T X \times \dots \times T^{n-1} X,
+\end{align*}
+called the cofree functor. 
 
 \begin{proposition}\label{prop:cofree_exponentiating}
-    Let $T\colon \Cat \rightarrow \Cat$ be an architecture. Then cofree coalgebras in $\Cat^T$ are exponentiating. In particular, let $F\colon \Cat \rightarrow \Cat^T$ denote the cofree functor. Then, there exists a natural isomorphism
+    Let $T\colon \Cat \rightarrow \Cat$ be a nilpotent architecture. Then cofree coalgebras in $\Cat^T$ are exponentiating. More explicitly, let $F\colon \Cat \rightarrow \Cat^T$ denote the cofree functor. Then, there exists a natural isomorphism
     \begin{equation*}
-        \Hom(A\otimes B, FX) \simeq \Hom(A, F[UB, X]).
+        \Hom(A\times B, FX) \simeq \Hom(A, F[UB, X]).
     \end{equation*}
 \end{proposition}
 
 \begin{proof}
     By a straightforward computation:
     \begin{align*}
-        \Hom_{\Cat^T}(A\otimes B, FX)
-        &\simeq \Hom_{\Cat}(U(A \otimes B), X)\\
-        &\simeq \Hom_{\Cat}(UA \otimes UB, X)\\
+        \Hom_{\Cat^T}(A\times B, FX)
+        &\simeq \Hom_{\Cat}(U(A \times B), X)\\
+        &\simeq \Hom_{\Cat}(UA \times UB, X)\\
         &\simeq \Hom_{\Cat}(UA, [UB, X])\\
         &\simeq \Hom_{\Cat^T}(A, F[UB, X]).
     \end{align*}
@@ -199,21 +167,18 @@ Here, we consider how to define a notion of weight sharing given an architecture
 \begin{theorem}\label{thm:weight_sharing}
     Let $M \in \Cat^T$ be a monoid. Then $M$ induces a comonad:
     \begin{equation*}
-        X \mapsto T[UM, X].
+        X \mapsto UF[UM, X].
     \end{equation*}
 \end{theorem}
 
 \begin{proof}
-    \pietro{Use $F[UM, X]$ and Kleisli category. Attenzione: Kleisli non ha per forza un prodotto tensore.} Monoidal functor
-    \begin{equation*}
-        \left(\Cat^T\right)^{op} \rightarrow \Fun(\Cat_T, \Cat_T),
-    \end{equation*}
+    Monoidal functor
+    \begin{align*}
+        \left(\Cat^T\right)^{op} &\rightarrow \Fun(\Cat_T, \Cat_T)\\
+        M &\mapsto [M, \anon],
+    \end{align*}
     hence monoid goes to comonad. That, and free forget from Kleisli to $\Cat$.
 \end{proof}
-
-\section{Locality}
-
-\pietro{Fai la localita' in termini di sottoggetti di M o qualcosa di simile. Funziona?}
 
 \section{Comonadic machines}
 
@@ -221,7 +186,7 @@ Show how it's possible to obtain a machine from an architecture.
 
 \section{Recurrent and convolutional neural networks}
 
-Monoids can be considered as categories with one object. Let us consider the category corresponding to $\mathbb N$. Let $M$ be the set containing only the generator morphism. Then the above construction recovers recurrent neural networks. Analogously, considering $\mathbb N \times \mathbb N$ we obtain convolutional neural networks, where $M$ denotes the shape of the filter.
+Monoids can be considered as categories with one object. Let us consider the category corresponding to $\N$. Let $M$ be the set containing only the generator morphism. Then the above construction recovers recurrent neural networks. Analogously, considering $\N \times \N$ we obtain convolutional neural networks, where $M$ denotes the shape of the filter. \pietro{Update this part, it no longer makes sense.}
 \pietro{TODO: mention 2 objects for conv, and strides!}
 \pietro{Maybe also do functors, to generalize GENEO? Somehow discuss continuous version?}
 
