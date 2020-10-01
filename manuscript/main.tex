@@ -48,7 +48,8 @@
 \newcommand{\Set}{{\mathbf{Set}}}
 \newcommand{\Cat}{{\mathbf{C}}}
 \newcommand{\DCat}{{\mathbf{D}}}
-\newcommand{\coalg}{{F\textnormal{-coalg}}}
+\newcommand{\Coalg}{{F\textnormal{-coalg}}}
+\newcommand{\FreeCoalg}{{F\textnormal{-coalg}_f}}
 \newcommand{\range}[2]{{\{{#1}, \dots,{#2}\}}}
 \newcommand{\anon}{{\,\mbox{-}\,}}
 
@@ -141,7 +142,7 @@ This is sufficient to give notions of composability, weight sharing, and localit
 
 \subsection{The category of coalgebras}
 
-Let $F\colon \Cat \rightarrow \Cat$ be a nilpotent architecture. We can consider $\coalg$, the category of coalgebras over $F$ \pietro{add ref}. Object are simply maps
+Let $F\colon \Cat \rightarrow \Cat$ be a nilpotent architecture. We can consider $\Coalg$, the category of coalgebras over $F$ \pietro{add ref}. Object are simply maps
 \begin{equation*}
     X \rightarrow F X,
 \end{equation*}
@@ -156,16 +157,22 @@ where $X \in \Obj(\Cat)$. Morphisms are given by commutative diagrams
 \end{equation*}
 As $F$ is an architecture, it is straightforward to verify that the forgetful functor
 \begin{equation*}
-    U \colon \coalg \rightarrow \Cat
+    U \colon \Coalg \rightarrow \Cat
 \end{equation*}
 has a right adjoint $\Phi$, called the cofree functor, given by
 \begin{equation*}
     \Phi(X) = X \times F X \times \dots \times F^{n-1} X \rightarrow F X \times \dots \times F^{n-1} X.
 \end{equation*}
-Furthermore this adjunction is comonadic \pietro{explain and cite Beck's theorem}, and $\coalg$ is the Eilenberg-Moore category $\Cat^T$, where $T = U\Phi$. Let $T$ be the comonad corresponding to a nilpotent architecture on a Cartesian closed category $\Cat$. Let $\Cat^T$ be category of coalgebras for the functor $T$. $\Cat^T$ also has finite products given by
+
+\begin{remark}
+    This adjunction is comonadic \pietro{explain and cite Beck's theorem}, and $\Coalg$ is the Eilenberg-Moore category $\Cat^T$, where $T = U\Phi$. \pietro{ Non una remark cruciale, forse non vale la pena...}
+\end{remark}
+
+$\Coalg$ is Cartesian, with finite products given by
 \begin{equation*}
-    \prod_{i=1}^k A_i \rightarrow \prod_{i=1}^k T A_i \simeq T \prod_{i=1}^k A_i.
+    \prod_{i=1}^k A_i \rightarrow \prod_{i=1}^k F A_i \simeq F \prod_{i=1}^k A_i,
 \end{equation*}
+and both $U$ and $\Phi$ are Cartesian functors.
 
 \section{Weight sharing}
 
@@ -186,7 +193,7 @@ We aim to show that the simple notion of weight sharing defined above is suffici
 Here, we consider how to define a notion of weight sharing given a nilpotent architecture $F\colon\Cat \rightarrow \Cat$.
 
 \begin{proposition}\label{prop:cofree_exponentiating}
-    Let $F\colon \Cat \rightarrow \Cat$ be a nilpotent architecture, and let $T$ be its cofree comonad \pietro{explain!}. Then cofree coalgebras in $\Cat^T$ are exponentiating. More explicitly, let $\Phi\colon \Cat \rightarrow \Cat^T$ denote the cofree functor. Then, there exists a natural isomorphism
+    Let $F\colon \Cat \rightarrow \Cat$ be a nilpotent architecture. Then cofree coalgebras in $\Coalg$ are exponentiating. More explicitly, let $\Phi\colon \Cat \rightarrow \Coalg$ denote the cofree functor. Then, there exists a natural isomorphism
     \begin{equation*}
         \Hom(A\times B, \Phi X) \simeq \Hom(A, \Phi[UB, X]).
     \end{equation*}
@@ -195,25 +202,26 @@ Here, we consider how to define a notion of weight sharing given a nilpotent arc
 \begin{proof}
     By a straightforward computation:
     \begin{align*}
-        \Hom_{\Cat^T}(A\times B, FX)
+        \Hom_{\Coalg}(A\times B, \Phi X)
          & \simeq \Hom_{\Cat}(U(A \times B), X) \\
          & \simeq \Hom_{\Cat}(UA \times UB, X)  \\
          & \simeq \Hom_{\Cat}(UA, [UB, X])      \\
-         & \simeq \Hom_{\Cat^T}(A, F[UB, X]).
+         & \simeq \Hom_{\Coalg}(A, \Phi[UB, X]).
     \end{align*}
 \end{proof}
 
 \begin{theorem}\label{thm:weight_sharing}
-    Let $M \in \Cat^T$ be a monoid. Then $M$ induces a comonad:
+    Let $M \in \Coalg$ be a monoid. Then $M$ induces a comonad:
     \begin{equation*}
-        X \mapsto UF[UM, X].
+        X \mapsto U\Phi[UM, X].
     \end{equation*}
+    \pietro{Non so se ci serve.}
 \end{theorem}
 
 \begin{proof}
     Monoidal functor
     \begin{align*}
-        \left(\Cat^T\right)^{op} & \rightarrow \Fun(\Cat_T, \Cat_T) \\
+        \left(\Coalg\right)^{op} & \rightarrow \Fun(\FreeCoalg, \FreeCoalg) \\
         M                        & \mapsto [M, \anon],
     \end{align*}
     hence monoid goes to comonad. That, and free forget from Kleisli to $\Cat$.
