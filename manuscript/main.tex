@@ -22,6 +22,8 @@
 \usepackage[all]{xy}
 \usepackage[inline]{enumitem}
 
+\usepackage{tikz-cd}
+
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
 \newtheorem{remark}{Remark}
@@ -46,10 +48,7 @@
 \newcommand{\Set}{{\mathbf{Set}}}
 \newcommand{\Cat}{{\mathbf{C}}}
 \newcommand{\DCat}{{\mathbf{D}}}
-\newcommand{\ICat}{{\mathcal{I}}}
-\newcommand{\JCat}{{\mathcal{J}}}
-\newcommand{\LCat}{{\mathbf{L}}}
-\newcommand{\QCat}{{\mathbf{Q}}}
+\newcommand{\coalg}{{F\textnormal{-coalg}}}
 \newcommand{\range}[2]{{\{{#1}, \dots,{#2}\}}}
 \newcommand{\anon}{{\,\mbox{-}\,}}
 
@@ -67,57 +66,106 @@
 \begin{abstract}
 \end{abstract}
 
-\section{Architecture}
-
+\section{Machine}
 
 \begin{definition}\label{def:cartesian_category}
     We say that a category is {\em Cartesian} if it has finite products. We say that a functor between Cartesian categories is Cartesian if it preserves finite products.
 \end{definition}
 
+\begin{definition}\label{def:machine}
+    Let $\Cat$ be a Cartesian category. Let $A, X \in \Obj(\Cat)$. A map
+    \begin{equation*}
+        \varrho \colon A \times X \rightarrow X
+    \end{equation*}
+    is a {\em machine} if there exists a unique map $S_\varrho$ such that the following diagram commutes
+    \begin{equation}
+        \begin{tikzcd}[column sep=large]\label[diagram]{diag:machine_condition}
+            A \arrow[rightarrow]{r}{\left(\id, S_\varrho\right)}
+            \arrow[rightarrow,swap]{dr}{S_\varrho}
+            & A \times X \arrow[rightarrow]{d}{\varrho} \\
+            & X
+        \end{tikzcd}
+    \end{equation}
+    We call $S_\varrho$ the {\em stable state} of $\varrho$.
+\end{definition}
+
+\Cref{diag:machine_condition} is analogous to the machine condition in~\cite{2020arXiv200702777V} in the case when $X$ is an Abelian group and $\varrho\colon A \times X \rightarrow X$ is the sum of a map $A \rightarrow X$ and a map $X \rightarrow X$.
+This approach differs from the one taken in~\cite{2020arXiv200702777V}, in that here the object $A$ represents both input space and parameters. In what follows, we will show how to construct examples of {\em machines} using {\em nilpotent functors}.
+
+\subsection{Architecture}
+
 \begin{definition}\label{def:nilpotent_functor}
-    A functor $T$ is {\em nilpotent} if there exists $n \in \N$ such that the composed functor $T^n$ maps all objects to the terminal object.
+    A functor $F$ is {\em nilpotent} if there exists $n \in \N$ such that the composed functor $F^n$ maps all objects to the terminal object.
 \end{definition}
 
 We begin by giving an abstract definition of {\em nilpotent architecture}.
 
 \begin{definition}\label{def:nilpotent_architecture}
-    Let $\Cat$ be a Cartesian category. A {\em nilpotent architecture} is a nilpotent Cartesian endofunctor $T \colon \Cat \rightarrow \Cat$.
+    Let $\Cat$ be a Cartesian category. A {\em nilpotent architecture} is a nilpotent Cartesian endofunctor $F \colon \Cat \rightarrow \Cat$.
 \end{definition}
 
 This is sufficient to give notions of composability, weight sharing, and locality. In the reminder of the section, we will first give a broad class of architectures. Then, we will consider a simpler special case and show that it is sufficient to recover, among other examples, classical recurrent and convolutional neural networks.
 
-\subsection{Examples}
+\subsubsection*{Examples}
 
 \begin{proposition}\label{prop:graph_architecture}
     Let $(E, V)$ be a directed acyclic graph. Let $\DCat$ be a Cartesian category. The functor
     \begin{align*}
-        T \colon \DCat^V &\rightarrow \DCat^V \\
-        (T X)(v) &= \prod_{u \in in(v)} X(u),  
+        F \colon \DCat^V & \rightarrow \DCat^V                  \\
+        (F X)(v)         & = \prod_{u \, | \, (u, v)\in E} X(u)
     \end{align*}
-    where $in(v)$ is the set of incoming neighbors of $v$, is a nilpotent architecture.
+    is a nilpotent architecture.
 \end{proposition}
 
 \begin{proof}
-    It is straightforward to verify that $T$ preserves finite products. Let $n$ be such that there are no paths of length $n$ in $(V, E)$. Then $T^n X$ is the terminal object.
+    It is straightforward to verify that $F$ preserves finite products. Let $n$ be such that there are no paths of length $n$ in $(V, E)$. Then $F^n X$ is the terminal object.
 \end{proof}
 
 \Cref{prop:graph_architecture} has a continuous analogue in locally Cartesian closed categories.
 \begin{proposition}\label{[prop]:categorical_architecture}
-    Let $\QCat$ be a locally Cartesian closed category. Let $s, t\colon E \rightarrow V$ be two parallel arrows. Let us assume that there exists $n \in \N$ such that the iterated pullback
+    Let $\DCat$ be a locally Cartesian closed category. Let $s, t\colon E \rightarrow V$ be two parallel arrows. Let us assume that there exists $n \in \N$ such that the iterated pullback
     \begin{equation}\label{eq:nilpotent_left_adjoint}
-       \underbrace{E \times_V E \times_V \dots \times_V E}_{n \text{ factors}}
+        \underbrace{E \times_V E \times_V \dots \times_V E}_{n \text{ factors}}
     \end{equation}
-    is initial in $\QCat/V$.
-    Then
+    is initial in $\DCat/V$.
+    Then \pietro{TODO: definisci * e ! (base change functors).}
     \begin{equation*}
-        s_!t^*\colon \QCat/V \rightarrow \QCat/V
+        s_!t^*\colon \DCat/V \rightarrow \DCat/V
     \end{equation*}
-    is a nilpotent architecture on $\QCat/V$.
+    is a nilpotent architecture on $\DCat/V$.
 \end{proposition}
 
 \begin{proof}
-    The functor $s_!t^*$ is the right adjoint of  $t_*s^*\colon \QCat/C_0 \rightarrow \QCat/C_0$, and therefore it is Cartesian. By~\cref{eq:nilpotent_left_adjoint}, $(t_*s^*)^n$ maps all objects to the initial object, so its adjoint $(s_!t^*)^n$ maps all objects to the terminal object.
+    The functor $s_!t^*$ is the right adjoint of  $t_*s^*\colon \DCat/C_0 \rightarrow \DCat/C_0$, and therefore it is Cartesian. By~\cref{eq:nilpotent_left_adjoint}, $(t_*s^*)^n$ maps all objects to the initial object, so its adjoint $(s_!t^*)^n$ maps all objects to the terminal object.
 \end{proof}
+
+\subsection{The category of coalgebras}
+
+Let $F\colon \Cat \rightarrow \Cat$ be a nilpotent architecture. We can consider $\coalg$, the category of coalgebras over $F$ \pietro{add ref}. Object are simply maps
+\begin{equation*}
+    X \rightarrow F X,
+\end{equation*}
+where $X \in \Obj(\Cat)$. Morphisms are given by commutative diagrams
+\begin{equation*}
+    \begin{tikzcd}
+        X \arrow[rightarrow]{d} \arrow[rightarrow]{r}{\phi}
+        & Y \arrow[rightarrow]{d} \\
+        FX \arrow[rightarrow]{r}{F \phi}
+        & FY
+    \end{tikzcd}
+\end{equation*}
+As $F$ is an architecture, it is straightforward to verify that the forgetful functor
+\begin{equation*}
+    U \colon \coalg \rightarrow \Cat
+\end{equation*}
+has a right adjoint $\Phi$, called the cofree functor, given by
+\begin{equation*}
+    \Phi(X) = X \times F X \times \dots \times F^{n-1} X \rightarrow F X \times \dots \times F^{n-1} X.
+\end{equation*}
+Furthermore this adjunction is comonadic \pietro{explain and cite Beck's theorem}, and $\coalg$ is the Eilenberg-Moore category $\Cat^T$, where $T = U\Phi$. Let $T$ be the comonad corresponding to a nilpotent architecture on a Cartesian closed category $\Cat$. Let $\Cat^T$ be category of coalgebras for the functor $T$. $\Cat^T$ also has finite products given by
+\begin{equation*}
+    \prod_{i=1}^k A_i \rightarrow \prod_{i=1}^k T A_i \simeq T \prod_{i=1}^k A_i.
+\end{equation*}
 
 \section{Weight sharing}
 
@@ -127,29 +175,20 @@ One of the key reasons for the success of neural networks is the notion of {\em 
 \end{equation*}
 one can consider the map
 \begin{align*}
-    \widehat{\cal F} \colon [M, X] &\rightarrow [M, X] \\
-    \left(\widehat{\cal F}\phi\right)(m) &= {\cal F}(a \mapsto \phi(ma)).
+    \widehat{\cal F} \colon [M, X]       & \rightarrow [M, X]              \\
+    \left(\widehat{\cal F}\phi\right)(m) & = {\cal F}(a \mapsto \phi(ma)).
 \end{align*}
 
 This simple notion of weight sharing does not seem sufficient to cover complex neural networks, made up of several nodes, each with their own symmetries, which interact with each other in non-trivial ways.
 
 We aim to show that the simple notion of weight sharing defined above is sufficient to recover, among other examples, classical recurrent and convolutional neural networks. However, to do so, we will need to generalize not the weight sharing strategy, but rather the underlying category on which such strategy takes place.
 
-Here, we consider how to define a notion of weight sharing given a nilpotent architecture $T\colon\Cat \rightarrow \Cat$. Let $T$ be a nilpotent architecture on a Cartesian closed category $\Cat$. Let $\Cat^T$ be category of coalgebras for the functor $T$. $\Cat^T$ also has finite products given by
-\begin{equation*}
-    \prod_{i=1}^k A_i \rightarrow \prod_{i=1}^k T A_i \simeq T \prod_{i=1}^k A_i.
-\end{equation*}
-The coforgetful functor $U\colon \Cat^T \rightarrow \Cat$ has a right adjoint
-\begin{align*}
-    F \colon \Cat &\rightarrow \Cat^T\\
-    X &\mapsto X \times T X \times \dots \times T^{n-1} X,
-\end{align*}
-called the cofree functor. 
+Here, we consider how to define a notion of weight sharing given a nilpotent architecture $F\colon\Cat \rightarrow \Cat$.
 
 \begin{proposition}\label{prop:cofree_exponentiating}
-    Let $T\colon \Cat \rightarrow \Cat$ be a nilpotent architecture. Then cofree coalgebras in $\Cat^T$ are exponentiating. More explicitly, let $F\colon \Cat \rightarrow \Cat^T$ denote the cofree functor. Then, there exists a natural isomorphism
+    Let $F\colon \Cat \rightarrow \Cat$ be a nilpotent architecture, and let $T$ be its cofree comonad \pietro{explain!}. Then cofree coalgebras in $\Cat^T$ are exponentiating. More explicitly, let $\Phi\colon \Cat \rightarrow \Cat^T$ denote the cofree functor. Then, there exists a natural isomorphism
     \begin{equation*}
-        \Hom(A\times B, FX) \simeq \Hom(A, F[UB, X]).
+        \Hom(A\times B, \Phi X) \simeq \Hom(A, \Phi[UB, X]).
     \end{equation*}
 \end{proposition}
 
@@ -157,10 +196,10 @@ called the cofree functor.
     By a straightforward computation:
     \begin{align*}
         \Hom_{\Cat^T}(A\times B, FX)
-        &\simeq \Hom_{\Cat}(U(A \times B), X)\\
-        &\simeq \Hom_{\Cat}(UA \times UB, X)\\
-        &\simeq \Hom_{\Cat}(UA, [UB, X])\\
-        &\simeq \Hom_{\Cat^T}(A, F[UB, X]).
+         & \simeq \Hom_{\Cat}(U(A \times B), X) \\
+         & \simeq \Hom_{\Cat}(UA \times UB, X)  \\
+         & \simeq \Hom_{\Cat}(UA, [UB, X])      \\
+         & \simeq \Hom_{\Cat^T}(A, F[UB, X]).
     \end{align*}
 \end{proof}
 
@@ -174,8 +213,8 @@ called the cofree functor.
 \begin{proof}
     Monoidal functor
     \begin{align*}
-        \left(\Cat^T\right)^{op} &\rightarrow \Fun(\Cat_T, \Cat_T)\\
-        M &\mapsto [M, \anon],
+        \left(\Cat^T\right)^{op} & \rightarrow \Fun(\Cat_T, \Cat_T) \\
+        M                        & \mapsto [M, \anon],
     \end{align*}
     hence monoid goes to comonad. That, and free forget from Kleisli to $\Cat$.
 \end{proof}
