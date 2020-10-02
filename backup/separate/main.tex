@@ -69,6 +69,7 @@
 
 \section{Introduction}
 
+\pietro{Qui o dopo.}
 One of the key reasons for the success of neural networks is the notion of {\em weight sharing}. In its simplest form, one can consider, among maps $[M, X] \rightarrow [M, X]$, those that originate from maps $[M, X] \rightarrow X$. Indeed, given
 \begin{equation*}
     {\cal F} \colon [M, X] \rightarrow X,
@@ -81,39 +82,26 @@ one can consider the map
 
 This simple notion of weight sharing does not seem sufficient to cover complex neural networks, made up of several nodes, each with their own symmetries, which interact with each other in non-trivial ways.
 
-We aim to show that the a similar strategy, based on a different comonad, is sufficient to recover, among other examples, classical recurrent and convolutional neural networks, incorporating at the same time equivariance and locality.
+We aim to show that the simple notion of weight sharing defined above is sufficient to recover, among other examples, classical recurrent and convolutional neural networks. However, to do so, we will need to generalize not the weight sharing strategy, but rather the underlying category on which such strategy takes place.
 
-\section{Architecture}
-
-\begin{definition}\label{def:cartesian_category}
-    We say that a category is {\em Cartesian} if it has finite products. We say that a functor between Cartesian categories is {\em Cartesian} if it preserves finite products.
-\end{definition}
+\section{Categorical preliminaries}
 
 \begin{definition}\label{def:nilpotent_functor}
     A functor $F$ is {\em nilpotent} if there exists $n \in \N$ such that the composed functor $F^n$ maps all objects to the terminal object.
 \end{definition}
 
-We begin by giving an abstract definition of {\em nilpotent architecture}.
-
-\begin{definition}\label{def:nilpotent_architecture}
-    Let $\Cat$ be a Cartesian category. A {\em nilpotent architecture} is a nilpotent Cartesian endofunctor $F \colon \Cat \rightarrow \Cat$.
-\end{definition}
-
-This is sufficient to give notions of composability, weight sharing, and locality.
-Graph-like structures are a source of examples of nilpotent architecture.
+Graph-like structures are a source of examples of nilpotent functors.
 
 \begin{proposition}\label{prop:graph_architecture}
-    \pietro{Il multigrafo è più interessante, ma tanto è solo un esempio.}
-    Let $(E, V)$ be a directed acyclic graph. Let $\DCat$ be a Cartesian category. The functor
+    Let $(E, V)$ be a directed acyclic graph. Let $\DCat$ be a category with finite products. The functor
     \begin{align*}
         F \colon \DCat^V & \rightarrow \DCat^V                  \\
         (F X)(v)         & = \prod_{u \, | \, (u, v)\in E} X(u)
     \end{align*}
-    is a nilpotent architecture.
+    is nilpotent.
 \end{proposition}
 
 \begin{proof}
-    It is straightforward to verify that $F$ is Cartesian.
     Let $n$ be such that there are no paths of length $n$ in $(V, E)$. Then $F^n X$ is the terminal object.
 \end{proof}
 
@@ -136,16 +124,16 @@ Graph-like structures are a source of examples of nilpotent architecture.
     \begin{equation*}
         s_!t^*\colon \DCat/V \rightarrow \DCat/V
     \end{equation*}
-    is a nilpotent architecture.
+    is a nilpotent endofunctor.
 \end{proposition}
 
 \begin{proof}
-    The functor $s_!t^*$ is the right adjoint of the functor  $t_*s^*\colon \DCat/V \rightarrow \DCat/V$, hence it preserves limits and is therefore Cartesian. By~\cref{eq:nilpotent_left_adjoint}, $(t_*s^*)^n$ maps all objects to the initial object, so its adjoint $(s_!t^*)^n$ maps all objects to the terminal object.
+    The functor $s_!t^*$ is the right adjoint of the functor  $t_*s^*\colon \DCat/V \rightarrow \DCat/V$. By~\cref{eq:nilpotent_left_adjoint}, $(t_*s^*)^n$ maps all objects to the initial object, so its adjoint $(s_!t^*)^n$ maps all objects to the terminal object.
 \end{proof}
 
 \subsection{The category of coalgebras}
 
-Let $\Cat$ be a Cartesian closed category, and let $F\colon \Cat \rightarrow \Cat$ be a nilpotent architecture. We can consider $\FCoalg$, the category of coalgebras over $F$ \pietro{add ref}. Objects are simply maps
+Let $\Cat$ be a Cartesian closed category with finite limits, and let $F\colon \Cat \rightarrow \Cat$ be a left exact (i.e., preserves finite limits) nilpotent endofunctor. We can consider $\FCoalg$, the category of coalgebras over $F$ \pietro{add ref}. Objects are simply maps
 \begin{equation*}
     X \rightarrow F X,
 \end{equation*}
@@ -158,10 +146,6 @@ where $X \in \Obj(\Cat)$. Morphisms are given by commutative diagrams
         & FY
     \end{tikzcd}
 \end{equation*}
-As $F$ is Cartesian, the category $\FCoalg$ is also Cartesian, with products given by
-\begin{equation*}
-    \prod_{i \in I} X_i \rightarrow \prod_{i \in I} F X_i \simeq F \prod_{i \in I} X_i.
-\end{equation*}
 As $F$ is nilpotent and preserves finite products, it is straightforward to verify that the forgetful functor
 \begin{equation*}
     U \colon \FCoalg \rightarrow \Cat
@@ -171,9 +155,31 @@ has a right adjoint $\Phi$, called the cofree functor, given by
     \Phi(X) = X \times F X \times \dots \times F^{n-1} X \rightarrow F X \times \dots \times F^{n-1} X.
 \end{equation*}
 
-\begin{remark}
-    This adjunction is comonadic \pietro{explain! cite Beck's theorem!}, and $\FCoalg$ is the Eilenberg-Moore category $\Cat^T$, where $T = U\Phi$.
-\end{remark}
+This adjunction is comonadic \pietro{explain! cite Beck's theorem!}, and $\FCoalg$ is the Eilenberg-Moore category $\Cat^T$, where $T = U\Phi$. As $T$ is left exact (product of left exact), $\FCoalg \simeq \Cat^T$ is Cartesian closed and it has finite limits, which are preserved by both $U$ and $\Phi$~\cite[Sect.~5.50]{wyler1991lecture}.
+
+\begin{proposition}\label{prop:cofree_exponentiating}
+    Let $F\colon \Cat \rightarrow \Cat$ be a left exact, nilpotent endofunctor. Then the exponential of cofree coalgebras is again cofree.
+    More explicitly, let $\Phi\colon \Cat \rightarrow \FCoalg$ denote the cofree functor. Then, there exists a natural isomorphism
+    \begin{equation*}
+        [B, \Phi X] \simeq \Phi[UB, X].
+    \end{equation*}
+\end{proposition}
+
+\begin{proof}
+    By a straightforward computation:
+    \begin{align*}
+        \Hom_{\FCoalg}(A, [B, \Phi X])
+         & \simeq \Hom_{\FCoalg}(A\times B, \Phi X)     \\
+         & \simeq \Hom_{\Cat}(U(A \times B), X)  \\
+         & \simeq \Hom_{\Cat}(UA \times UB, X)   \\
+         & \simeq \Hom_{\Cat}(UA, [UB, X])       \\
+         & \simeq \Hom_{\FCoalg}(A, \Phi[UB, X]).
+    \end{align*}
+    By Yoneda's lemma, this induces a natural isomorphism
+    \begin{equation*}
+        [B, \Phi X] \simeq \Phi[UB, X].
+    \end{equation*}
+\end{proof}
 
 \section{Machines}
 
@@ -209,19 +215,40 @@ has a right adjoint $\Phi$, called the cofree functor, given by
 
 \Cref{diag:machine_condition} is analogous to the machine condition in~\cite{2020arXiv200702777V} in the case when $X$ is an Abelian group and $\varrho\colon P \times X \rightarrow X$ is the sum of a map $P \rightarrow X$ and a map $X \rightarrow X$. This approach differs from the one taken in~\cite{2020arXiv200702777V}, in that here the object $P$ represents both input space and parameters. In what follows, we will show how to construct examples of {\em machines} using {\em nilpotent functors}.
 
+% \begin{definition}\label{def:nilpotent_architecture}
+%     A {\em nilpotent architecture} is a left exact, nilpotent endofunctor $F$ on a finitely complete, Cartesian closed category $\Cat$.
+% \end{definition}
+
 \begin{theorem}\label{thm:nilpotent_architecture}
-    Let $F\colon \Cat \rightarrow \Cat$ be a nilpotent endofunctor. Let $\Phi X$ be a cofree coalgebra in $\FCoalg$. Let $P$ be a $F$ coalgebra. Then a map $P \times F X \rightarrow X$ induces a parametric machine $P \times \Phi X \rightarrow \Phi X$.
+    Let $F\colon \Cat \rightarrow \Cat$ be a left exact, nilpotent endofunctor. Let $\Phi(X)$ be a cofree coalgebra in $\FCoalg$. Then a map $F X \rightarrow X$ induces a machine $\Phi X \rightarrow \Phi X$.
 \end{theorem}
 
 \begin{proof}
-    \pietro{TODO per induzione.}
+    \pietro{TODO, da fare anche con parametric machines e $P \times F X \rightarrow X$, dove $P$ è una $F$ coalgebra con un'azione di $M$.}
 \end{proof}
 
-\pietro{La sfida principale qui è trovare un buona architettura $F$ ma anche una buona coalgebra $P$. Probabilmente da menzionare da qualche parte che se la categoria di base è buona, $\FCoalg$ ha molte buone proprietà.}
+\begin{definition}\label{def:architecture}
+    An {\em architecture} is a quiver of bounded depth $s,t \colon E \rightrightarrows V$ in a locally Cartesian closed category $\DCat$, together with a monoid object $M$ in $\stCoalg$.
+\end{definition}
+
+This is sufficient to give notions of composability, weight sharing, and locality.
+
+\begin{theorem}\label{thm:weight_sharing}
+    A nilpotent architecture $M, s, t$ induces a comonad on $\DCat/V$, given by
+    \begin{equation*}
+        X \mapsto U\Phi[UM, X].
+    \end{equation*}
+\end{theorem}
+
+\begin{proof}
+    \pietro{Free forget composed with $[M, \anon]$ in $\stCoalg$.}
+\end{proof}
+
+\pietro{Forse si possono riunificare le due nozioni!}
 
 \section{Recurrent and convolutional neural networks}
 
-\pietro{discuss shape of filter?}
+Monoids can be considered as categories with one object. Let us consider the category corresponding to $\N$. Then the above construction recovers recurrent neural networks. Analogously, considering $\N \times \N$ we obtain convolutional neural networks \pietro{discuss shape of filter?}
 
 \section{Novel architectures}
 
