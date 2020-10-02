@@ -69,7 +69,7 @@
 
 \section{Introduction}
 
-\pietro{Qui o dopo.}
+\pietro{Forse non va piu bene.}
 One of the key reasons for the success of neural networks is the notion of {\em weight sharing}. In its simplest form, one can consider, among maps $[M, X] \rightarrow [M, X]$, those that originate from maps $[M, X] \rightarrow X$. Indeed, given
 \begin{equation*}
     {\cal F} \colon [M, X] \rightarrow X,
@@ -133,7 +133,7 @@ Graph-like structures are a source of examples of nilpotent functors.
 
 \subsection{The category of coalgebras}
 
-Let $\Cat$ be a Cartesian closed category with finite limits, and let $F\colon \Cat \rightarrow \Cat$ be a left exact (i.e., preserves finite limits) nilpotent endofunctor. We can consider $\FCoalg$, the category of coalgebras over $F$ \pietro{add ref}. Objects are simply maps
+Let $\Cat$ be a Cartesian closed category with finite products, and let $F\colon \Cat \rightarrow \Cat$ be a finite product-preserving, nilpotent endofunctor. We can consider $\FCoalg$, the category of coalgebras over $F$ \pietro{add ref}. Objects are simply maps
 \begin{equation*}
     X \rightarrow F X,
 \end{equation*}
@@ -155,31 +155,31 @@ has a right adjoint $\Phi$, called the cofree functor, given by
     \Phi(X) = X \times F X \times \dots \times F^{n-1} X \rightarrow F X \times \dots \times F^{n-1} X.
 \end{equation*}
 
-This adjunction is comonadic \pietro{explain! cite Beck's theorem!}, and $\FCoalg$ is the Eilenberg-Moore category $\Cat^T$, where $T = U\Phi$. As $T$ is left exact (product of left exact), $\FCoalg \simeq \Cat^T$ is Cartesian closed and it has finite limits, which are preserved by both $U$ and $\Phi$~\cite[Sect.~5.50]{wyler1991lecture}.
+% This adjunction is comonadic \pietro{explain! cite Beck's theorem!}, and $\FCoalg$ is the Eilenberg-Moore category $\Cat^T$, where $T = U\Phi$. As $T$ is left exact (product of left exact), $\FCoalg \simeq \Cat^T$ is Cartesian closed and it has finite limits, which are preserved by both $U$ and $\Phi$~\cite[Sect.~5.50]{wyler1991lecture}.
 
-\begin{proposition}\label{prop:cofree_exponentiating}
-    Let $F\colon \Cat \rightarrow \Cat$ be a left exact, nilpotent endofunctor. Then the exponential of cofree coalgebras is again cofree.
-    More explicitly, let $\Phi\colon \Cat \rightarrow \FCoalg$ denote the cofree functor. Then, there exists a natural isomorphism
-    \begin{equation*}
-        [B, \Phi X] \simeq \Phi[UB, X].
-    \end{equation*}
-\end{proposition}
+% \begin{proposition}\label{prop:cofree_exponentiating}
+%     Let $F\colon \Cat \rightarrow \Cat$ be a left exact, nilpotent endofunctor. Then the exponential of cofree coalgebras is again cofree.
+%     More explicitly, let $\Phi\colon \Cat \rightarrow \FCoalg$ denote the cofree functor. Then, there exists a natural isomorphism
+%     \begin{equation*}
+%         [B, \Phi X] \simeq \Phi[UB, X].
+%     \end{equation*}
+% \end{proposition}
 
-\begin{proof}
-    By a straightforward computation:
-    \begin{align*}
-        \Hom_{\FCoalg}(A, [B, \Phi X])
-         & \simeq \Hom_{\FCoalg}(A\times B, \Phi X)     \\
-         & \simeq \Hom_{\Cat}(U(A \times B), X)  \\
-         & \simeq \Hom_{\Cat}(UA \times UB, X)   \\
-         & \simeq \Hom_{\Cat}(UA, [UB, X])       \\
-         & \simeq \Hom_{\FCoalg}(A, \Phi[UB, X]).
-    \end{align*}
-    By Yoneda's lemma, this induces a natural isomorphism
-    \begin{equation*}
-        [B, \Phi X] \simeq \Phi[UB, X].
-    \end{equation*}
-\end{proof}
+% \begin{proof}
+%     By a straightforward computation:
+%     \begin{align*}
+%         \Hom_{\FCoalg}(A, [B, \Phi X])
+%          & \simeq \Hom_{\FCoalg}(A\times B, \Phi X)     \\
+%          & \simeq \Hom_{\Cat}(U(A \times B), X)  \\
+%          & \simeq \Hom_{\Cat}(UA \times UB, X)   \\
+%          & \simeq \Hom_{\Cat}(UA, [UB, X])       \\
+%          & \simeq \Hom_{\FCoalg}(A, \Phi[UB, X]).
+%     \end{align*}
+%     By Yoneda's lemma, this induces a natural isomorphism
+%     \begin{equation*}
+%         [B, \Phi X] \simeq \Phi[UB, X].
+%     \end{equation*}
+% \end{proof}
 
 \section{Machines}
 
@@ -243,6 +243,8 @@ This is sufficient to give notions of composability, weight sharing, and localit
 \begin{proof}
     \pietro{Free forget composed with $[M, \anon]$ in $\stCoalg$.}
 \end{proof}
+
+\pietro{Forse si possono riunificare le due nozioni!}
 
 \section{Recurrent and convolutional neural networks}
 
