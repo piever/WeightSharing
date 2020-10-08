@@ -48,7 +48,6 @@
 \newcommand{\Set}{{\mathbf{Set}}}
 \newcommand{\Cat}{{\mathbf{C}}}
 \newcommand{\DCat}{{\mathbf{D}}}
-\newcommand{\JCat}{{\mathcal{J}}}
 \newcommand{\FCoalg}{{F\textnormal{-coalg}}}
 \newcommand{\stCoalg}{{s_!t^*\textnormal{-coalg}}}
 \newcommand{\range}[2]{{\{{#1}, \dots,{#2}\}}}
@@ -84,32 +83,43 @@ This simple notion of weight sharing does not seem sufficient to cover complex n
 
 We aim to show that the a similar strategy, based on a different comonad, is sufficient to recover, among other examples, classical recurrent and convolutional neural networks, incorporating at the same time equivariance and locality.
 
-\section{Categorical preliminaries}
+\section{Architecture}
 
 \begin{definition}\label{def:cartesian_category}
     We say that a category is {\em Cartesian} if it has finite products. We say that a functor between Cartesian categories is {\em Cartesian} if it preserves finite products.
 \end{definition}
 
-\pietro{TODO definisci anche locally Cartesian closed!}
-
-\begin{proposition}\label{prop:internal_category_comonad}
-    Let $\DCat$ be a locally Cartesian closed category. Then, there is a well defined notion of category {\em internal} to $\DCat$~\cite{mac2013categories}.
-    Let $\JCat = s, t \colon C_1 \rightrightarrows C_0$ be such an internal category. $\JCat$ induces a limit-preserving comonad
-    \begin{equation*}
-        t_!s^*\colon \DCat/C_0 \rightrightarrows \DCat/C_0.
-    \end{equation*}
-    \pietro{TODO: definisci * e ! (base change functors).}
-\end{proposition}
-
-\begin{proof}
-    The map $s_*t^*\colon \DCat/C_0 \rightrightarrows \DCat/C_0$ is a monad~\cite[Thm.~V.8.2]{Mac_Lane_1994}. As $\DCat$ is locally Cartesian closed, $s^*$ has a right adjoint $s_!$, hence we can consider $t_!s^*$. As $T = t_!s^*$ is the right adjoint of the monad $s_*t^*$, it is a comonad. Being a right adjoint, $T$ preserves limits.
-\end{proof}
-
 \begin{definition}\label{def:nilpotent_functor}
     A functor $F$ is {\em nilpotent} if there exists $n \in \N$ such that the composed functor $F^n$ maps all objects to the terminal object.
 \end{definition}
 
-\begin{definition}\label{def:internal_quiver_bounded_depth}
+We begin by giving an abstract definition of {\em nilpotent architecture}.
+
+\begin{definition}\label{def:nilpotent_architecture}
+    Let $\Cat$ be a Cartesian category. A {\em nilpotent architecture} is a nilpotent Cartesian endofunctor $F \colon \Cat \rightarrow \Cat$.
+\end{definition}
+
+This is sufficient to give notions of composability, weight sharing, and locality.
+Graph-like structures are a source of examples of nilpotent architecture.
+
+\begin{proposition}\label{prop:graph_architecture}
+    \pietro{Il multigrafo è più interessante, ma tanto è solo un esempio.}
+    Let $(E, V)$ be a directed acyclic graph. Let $\DCat$ be a Cartesian category. The functor
+    \begin{align*}
+        F \colon \DCat^V & \rightarrow \DCat^V                  \\
+        (F X)(v)         & = \prod_{u \, | \, (u, v)\in E} X(u)
+    \end{align*}
+    is a nilpotent architecture.
+\end{proposition}
+
+\begin{proof}
+    It is straightforward to verify that $F$ is Cartesian.
+    Let $n$ be such that there are no paths of length $n$ in $(V, E)$. Then $F^n X$ is the terminal object.
+\end{proof}
+
+\Cref{prop:graph_architecture} has a continuous analogue in locally Cartesian closed categories, which will be our focus.
+
+\begin{definition}\label{def:categorical_architecture}
     Let $\DCat$ be a locally Cartesian closed category. An internal quiver
     \begin{equation*}
         s, t\colon E \rightrightarrows V
@@ -121,44 +131,17 @@ We aim to show that the a similar strategy, based on a different comonad, is suf
     is initial in $\DCat/V$.
 \end{definition}
 
-\begin{proposition}\label{prop:internal_quiver_functor}
-    Let $\DCat$ be a locally Cartesian closed category. Let $s, t\colon E \rightrightarrows V$ be an quiver of bounded depth. Then
+\begin{proposition}\label{prop:categorical_architecture}
+    Let $\DCat$ be a locally Cartesian closed category. Let $s, t\colon E \rightrightarrows V$ be an quiver of bounded depth. Then \pietro{TODO: definisci * e ! (base change functors).}
     \begin{equation*}
         s_!t^*\colon \DCat/V \rightarrow \DCat/V
     \end{equation*}
-    is a limit-preserving nilpotent functor.
+    is a nilpotent architecture.
 \end{proposition}
 
 \begin{proof}
     The functor $s_!t^*$ is the right adjoint of the functor  $t_*s^*\colon \DCat/V \rightarrow \DCat/V$, hence it preserves limits and is therefore Cartesian. By~\cref{eq:nilpotent_left_adjoint}, $(t_*s^*)^n$ maps all objects to the initial object, so its adjoint $(s_!t^*)^n$ maps all objects to the terminal object.
 \end{proof}
-
-\section{Equivariant architectures}
-
-Let us now assume that $\DCat$  is a locally Cartesian closed category with a terminal object (and thus all finite limits).
-
-\begin{definition}\label{def:equivariance_category}
-    Let $M$ be a monoid in $\DCat$ and $I \in \Obj$. The {\em equivariance category} $\JCat_{M, I}$ is given by the projection maps
-    \begin{equation*}
-        s, t\colon M \times I \times I \rightrightarrows I,
-    \end{equation*}
-    with composition and identity given by composition and identity in $M$. The {\em equivariance comonad} is the comonad induced by this category via~\cref{prop:internal_category_comonad}, that is, $t_!s^*$.
-\end{definition}
-
-We introduce the notion of {\em nilpotent constraint}, which we will need in order to limit equivariance and connectivity. To do so, we need some additional definitions.
-
-\begin{definition}\label{def:nilpotent_architecture}
-    Let $\JCat_{M, I}$ be an equivariance category. A {\em nilpotence constraint} on $\JCat_{M, I}$ is a subobject $S \subseteq M \times I \times I$ such that the internal quiver induced by
-    \begin{equation*}
-        S \hookrightarrow M \times I \times I \rightrightarrows I
-    \end{equation*}
-    has bounded depth, as in~\cref{def:internal_quiver_bounded_depth}.
-\end{definition}
-% Let $\Cat$ be a Cartesian category, and let $T$ be a comonad on $\Cat$. A {\em nilpotent constraint} on $T$ is a nilpotent Cartesian endofunctor $F \colon \Cat \rightarrow \Cat$ together with a natural transformation $\eta \colon T \rightarrow F$.
-
-This is sufficient to give a notion of locality.
-
-
 
 \subsection{The category of coalgebras}
 
