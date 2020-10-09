@@ -68,22 +68,6 @@
 \begin{abstract}
 \end{abstract}
 
-\section{Introduction}
-
-One of the key reasons for the success of neural networks is the notion of {\em weight sharing}. In its simplest form, one can consider, given a (compactly-generated Hausdorff) topological monoid $M$ and a finite-dimensional vector space $X$, those continuous maps $C(M, X) \rightarrow C(M, X)$ that originate from maps $C(M, X) \rightarrow X$. Indeed, given
-\begin{equation*}
-    {\cal F} \colon C(M, X) \rightarrow X,
-\end{equation*}
-one can consider the map
-\begin{align*}
-    \widehat{\cal F} \colon C(M, X)       & \rightarrow C(M, X)              \\
-    \left(\widehat{\cal F}\phi\right)(m) & = {\cal F}(a \mapsto \phi(am)).
-\end{align*}
-
-This simple notion of weight sharing does not seem sufficient to cover complex neural networks, made up of several nodes, each with their own symmetries, which interact with each other in non-trivial ways.
-
-We aim to show that a similar strategy is sufficient to recover, among other examples, classical recurrent and convolutional neural networks, incorporating at the same time equivariance and locality.
-
 \section{Linear-non-linear machines}
 
 We are interested in studying machines, in the sense of~\cite{2020arXiv200702777V}, of a specific type. In particular, we consider the scenario where the endofunctor $f$ is composed of a linear part $W$ and a nonlinear part $\sigma$, that is
@@ -130,9 +114,38 @@ This leads to the following reverse-mode rule for $z(W, b)$:
 \end{equation*}
 In particular, the core computation, shared across the two terms, is again a machine-like computation, given by a linear endofunction $W^\top J_\sigma^\top$. We are therefore interested in scenarios where both $W \sigma$ and $W^\top J_\sigma^\top$ are machines. For instance, if $W$ is strictly lower triangular (then $W^\top$ is strictly upper triangular, backprop), or if $W$ is a contraction and $\sigma$ is non-expansive. In the following sections, we will focus on the lower triangular case.
 
-\subsection{Continuous case}
+\section{Continuous case}
+
+As shown in~\cite{2020arXiv200702777V}, the continuous analogue of a feedforward neural network with all shortcut connections is given by a Volterra equation. Here we focus on Hammerstein type, that is:
+\begin{equation*}
+    x(t) = b(t) + \int_{t_0}^s K(t, s)\sigma(x(s)) ds.
+\end{equation*}
+As before, we denote $z(t) = \sigma(x(t))$ and obtain:
+\begin{equation*}
+    z(t) = \sigma\left(b(t) + \int_{t_0}^s K(t, s)z(s) ds\right).
+\end{equation*}
+We consider the strictly lower triangular case, which, in the continuous scenario, means that there is $\epsilon > 0$ such that $K(t, s) = 0$ whenever $t \le s + \epsilon$. In that case, we divide the interval $[t_0, T]$ in $N$ intervals of equal length $[t_0, t_0 + ih]$, where $h = \frac{T-t_0}{N} \le \epsilon$.
+We can then consider a quadrature rule $c_1,\dots, c_k$, with weights $w_1, \dots, w_k$, on $[0, 1]$. We write $z_{i, j} = z(t_0 + h(i + c_j))$. Then, the discretized Volterra equation becomes
+\begin{equation*}
+    z_{i, j} = \sigma\left(b(t_{i, j}) + h\sum_{i' = 0}^{i-1} \sum_{j' = 1}^n w_j' K(t_{i, j}, t_{i', j'}) z_{i', j'}\right),
+\end{equation*}
+which is a strictly lower triangular machine.
 
 \section{Equivariant Volterra machine}
+
+One of the key reasons for the success of neural networks is the notion of {\em weight sharing}. In its simplest form, one can consider, given a (compactly-generated Hausdorff) topological monoid $M$ and a finite-dimensional vector space $X$, those continuous maps $C(M, X) \rightarrow C(M, X)$ that originate from maps $C(M, X) \rightarrow X$. Indeed, given
+\begin{equation*}
+    {\cal F} \colon C(M, X) \rightarrow X,
+\end{equation*}
+one can consider the map
+\begin{align*}
+    \widehat{\cal F} \colon C(M, X)       & \rightarrow C(M, X)              \\
+    \left(\widehat{\cal F}\phi\right)(m) & = {\cal F}(a \mapsto \phi(am)).
+\end{align*}
+
+This simple notion of weight sharing does not seem sufficient to cover complex neural networks, made up of several nodes, each with their own symmetries, which interact with each other in non-trivial ways.
+
+We aim to show that a similar strategy is sufficient to recover, among other examples, classical recurrent and convolutional neural networks, incorporating at the same time equivariance and locality.
 
 Let $I$ be a measure space and $M$ be a measurable monoid equipped with a measure $\mu$.
 
