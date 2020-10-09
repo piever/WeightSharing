@@ -70,21 +70,71 @@
 
 \section{Introduction}
 
-One of the key reasons for the success of neural networks is the notion of {\em weight sharing}. In its simplest form, one can consider, among maps $[M, X] \rightarrow [M, X]$, those that originate from maps $[M, X] \rightarrow X$. Indeed, given
+One of the key reasons for the success of neural networks is the notion of {\em weight sharing}. In its simplest form, one can consider, given a (compactly-generated Hausdorff) topological monoid $M$ and a finite-dimensional vector space $X$, those continuous maps $C(M, X) \rightarrow C(M, X)$ that originate from maps $C(M, X) \rightarrow X$. Indeed, given
 \begin{equation*}
-    {\cal F} \colon [M, X] \rightarrow X,
+    {\cal F} \colon C(M, X) \rightarrow X,
 \end{equation*}
 one can consider the map
 \begin{align*}
-    \widehat{\cal F} \colon [M, X]       & \rightarrow [M, X]              \\
-    \left(\widehat{\cal F}\phi\right)(m) & = {\cal F}(a \mapsto \phi(ma)).
+    \widehat{\cal F} \colon C(M, X)       & \rightarrow C(M, X)              \\
+    \left(\widehat{\cal F}\phi\right)(m) & = {\cal F}(a \mapsto \phi(am)).
 \end{align*}
 
 This simple notion of weight sharing does not seem sufficient to cover complex neural networks, made up of several nodes, each with their own symmetries, which interact with each other in non-trivial ways.
 
-We aim to show that the a similar strategy, based on a different comonad, is sufficient to recover, among other examples, classical recurrent and convolutional neural networks, incorporating at the same time equivariance and locality.
+We aim to show that a similar strategy is sufficient to recover, among other examples, classical recurrent and convolutional neural networks, incorporating at the same time equivariance and locality.
 
-\section{Categorical preliminaries}
+\section{Linear-non-linear machines}
+
+We are interested in studying machines, in the sense of~\cite{2020arXiv200702777V}, of a specific type. In particular, we consider the scenario where the endofunctor $f$ is composed of a linear part $W$ and a nonlinear part $\sigma$, that is
+\begin{equation*}
+    f = W\circ \sigma.
+\end{equation*}
+For a given initial condition $b$, finding the stable state amounts to solving the equation
+\begin{equation*}
+    x = W\sigma(x) + b,
+\end{equation*}
+or, if we write $z = \sigma(x)$,
+\begin{equation*}
+    z = \sigma(Wz + b).
+\end{equation*}
+
+Let us assume that $W$ and $\sigma$ are such that $W\sigma$ is a machine (in the category of smooth spaces). Then one can write
+\begin{equation*}
+    z = z(W, b).
+\end{equation*}
+One can again use machines to perform reverse-mode differentiation. The change of $z$ corresponding to $\Delta W$ is
+\begin{equation*}
+    \frac{\partial z}{\partial W} \Delta W = J_\sigma \left(Mz + W \frac{\partial z}{\partial W} \Delta W\right).
+\end{equation*}
+Hence,
+\begin{equation*}
+    \frac{\partial z}{\partial W} \Delta W = (\id - J_\sigma W)^{-1} J_\sigma \Delta W z.
+\end{equation*}
+Given a loss function $l(z)$, the reverse-mode differentiation through the machine proceeds as follows:
+\begin{align*}
+    \frac{\partial l}{\partial z} \frac{\partial z}{\partial W} \Delta W
+    &= \frac{\partial l}{\partial z} \left(\id - J_\sigma W\right)^{-1} J_\sigma \Delta W z\\
+    &= tr\left(J_\sigma^\top \left(\id - W^\top J_\sigma^\top\right)^{-1}\frac{\partial l}{\partial z}^\top z^\top \Delta W^\top\right) \\
+    &= \left\langle J_\sigma^\top \left(\id - W^\top J_\sigma^\top\right)^{-1}\frac{\partial l}{\partial z}^\top z^\top, \Delta W\right\rangle.
+\end{align*}
+With a similar reasoning,
+\begin{align*}
+    \frac{\partial l}{\partial z} \frac{\partial z}{\partial b} \Delta b
+    &= \frac{\partial l}{\partial z} \left(\id - J_\sigma W\right)^{-1} J_\sigma \Delta b\\
+    &= \left\langle J_\sigma^\top \left(\id - W^\top J_\sigma^\top\right)^{-1}\frac{\partial l}{\partial z}^\top, \Delta b\right\rangle.
+\end{align*}
+This leads to the following reverse-mode rule for $z(W, b)$:
+\begin{equation*}
+    u \mapsto \left(J_\sigma^\top \left(\id - W^\top J_\sigma^\top\right)^{-1}u z^\top, J_\sigma^\top \left(\id - W^\top J_\sigma^\top\right)^{-1}u\right).
+\end{equation*}
+In particular, the core computation, shared across the two terms, is again a machine-like computation, given by a linear endofunction $W^\top J_\sigma^\top$. We are therefore interested in scenarios where both $W \sigma$ and $W^\top J_\sigma^\top$ are machines. For instance, if $W$ is strictly lower triangular (then $W^\top$ is strictly upper triangular, backprop), or if $W$ is a contraction and $\sigma$ is non-expansive. In the following sections, we will focus on the lower triangular case.
+
+\subsection{Continuous case}
+
+\section{Equivariant Volterra machine}
+
+Let $I$ be a measure space and $M$ be a measurable monoid equipped with a measure $\mu$.
 
 \begin{definition}\label{def:cartesian_category}
     We say that a category is {\em Cartesian} if it has finite products. We say that a functor between Cartesian categories is {\em Cartesian} if it preserves finite products.
