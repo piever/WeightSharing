@@ -35,6 +35,7 @@
 \newcommand{\mattia}[1]{\textcolor{cyan}{#1}}
 \newcommand{\pietro}[1]{\textcolor{teal}{#1}}
 \newcommand{\N}{{\mathbb{N}}}
+\newcommand{\R}{{\mathbb{R}}}
 \newcommand{\Ban}{{\mathbf{Ban}}}
 \newcommand{\Top}{{\mathbf{Top}}}
 \newcommand{\pt}{{\textnormal{pt}}}
@@ -58,7 +59,7 @@
 \Crefname{diagram}{Diagram}{Diagrams}
 \creflabelformat{diagram}{#2(#1)#3}
 
-\title{Weight sharing via comonads}
+\title{Categorical architectures of linear-nonlinear machines}
 \author{
     Pietro Vertechi \and Mattia G. Bergomi
 }
@@ -68,7 +69,7 @@
 \begin{abstract}
 \end{abstract}
 
-\section{Linear-non-linear machines}
+\section{Linear-nonlinear machines}
 
 We are interested in studying machines, in the sense of~\cite{2020arXiv200702777V}, of a specific type. In particular, we consider the scenario where the endofunctor $f$ is composed of a linear part $W$ and a nonlinear part $\sigma$, that is
 \begin{equation*}
@@ -114,7 +115,7 @@ This leads to the following reverse-mode rule for $z(W, b)$:
 \end{equation*}
 In particular, the core computation, shared across the two terms, is again a machine-like computation, given by a linear endofunction $W^\top J_\sigma^\top$. We are therefore interested in scenarios where both $W \sigma$ and $W^\top J_\sigma^\top$ are machines. For instance, if $W$ is strictly lower triangular (then $W^\top$ is strictly upper triangular, backprop), or if $W$ is a contraction and $\sigma$ is non-expansive. In the following sections, we will focus on the lower triangular case.
 
-\section{Continuous case}
+\subsection{Volterra equation with Gauss quadrature}
 
 As shown in~\cite{2020arXiv200702777V}, the continuous analogue of a feedforward neural network with all shortcut connections is given by a Volterra equation. Here we focus on Hammerstein type, that is:
 \begin{equation*}
@@ -127,183 +128,212 @@ As before, we denote $z(t) = \sigma(x(t))$ and obtain:
 We consider the strictly lower triangular case, which, in the continuous scenario, means that there is $\epsilon > 0$ such that $K(t, s) = 0$ whenever $t \le s + \epsilon$. In that case, we divide the interval $[t_0, T]$ in $N$ intervals of equal length $[t_0, t_0 + ih]$, where $h = \frac{T-t_0}{N} \le \epsilon$.
 We can then consider a quadrature rule $c_1,\dots, c_k$, with weights $w_1, \dots, w_k$, on $[0, 1]$. We write $z_{i, j} = z(t_0 + h(i + c_j))$. Then, the discretized Volterra equation becomes
 \begin{equation*}
-    z_{i, j} = \sigma\left(b(t_{i, j}) + h\sum_{i' = 0}^{i-1} \sum_{j' = 1}^n w_j' K(t_{i, j}, t_{i', j'}) z_{i', j'}\right),
+    z_{i, j} = \sigma\left(b(t_{i, j}) + h\sum_{i' = 0}^{i-1} \sum_{j' = 1}^n w_{j'} K(t_{i, j}, t_{i', j'}) z_{i', j'}\right),
 \end{equation*}
 which is a strictly lower triangular machine.
 
-\section{Equivariant Volterra machine}
+\section{Category measure algebra}
 
-One of the key reasons for the success of neural networks is the notion of {\em weight sharing}. In its simplest form, one can consider, given a (compactly-generated Hausdorff) topological monoid $M$ and a finite-dimensional vector space $X$, those continuous maps $C(M, X) \rightarrow C(M, X)$ that originate from maps $C(M, X) \rightarrow X$. Indeed, given
+Measurable categories, in a sense to be clarified later, are a convenient formalism to describe equivariant linear-nonlinear machines with locality constraints. We start with the discrete case.
+
+Let $\JCat = s, t \colon C_1 \rightrightarrows C_0$ be a finite category. Let $\mu, \nu$ be real-valued measures on $C_1$. We can define their convolution as
 \begin{equation*}
-    {\cal F} \colon C(M, X) \rightarrow X,
+    (\mu * \nu)(S) = \iint 1_S(m_1m_2) \mu(m_1)\nu(m_2)dm_1dm_2,
 \end{equation*}
-one can consider the map
-\begin{align*}
-    \widehat{\cal F} \colon C(M, X)       & \rightarrow C(M, X)              \\
-    \left(\widehat{\cal F}\phi\right)(m) & = {\cal F}(a \mapsto \phi(am)).
-\end{align*}
-
-This simple notion of weight sharing does not seem sufficient to cover complex neural networks, made up of several nodes, each with their own symmetries, which interact with each other in non-trivial ways.
-
-We aim to show that a similar strategy is sufficient to recover, among other examples, classical recurrent and convolutional neural networks, incorporating at the same time equivariance and locality.
-
-Let $I$ be a measure space and $M$ be a measurable monoid equipped with a measure $\mu$.
-
-\begin{definition}\label{def:cartesian_category}
-    We say that a category is {\em Cartesian} if it has finite products. We say that a functor between Cartesian categories is {\em Cartesian} if it preserves finite products.
-\end{definition}
-
-\pietro{TODO definisci anche locally Cartesian closed!}
-
-\begin{proposition}\label{prop:internal_category_comonad}
-    Let $\DCat$ be a locally Cartesian closed category. Then, there is a well defined notion of category {\em internal} to $\DCat$~\cite{mac2013categories}.
-    Let $\JCat = s, t \colon C_1 \rightrightarrows C_0$ be such an internal category. $\JCat$ induces a limit-preserving comonad
-    \begin{equation*}
-        t_!s^*\colon \DCat/C_0 \rightrightarrows \DCat/C_0.
-    \end{equation*}
-    \pietro{TODO: definisci * e ! (base change functors).}
-\end{proposition}
-
-\begin{proof}
-    The map $s_*t^*\colon \DCat/C_0 \rightrightarrows \DCat/C_0$ is a monad~\cite[Thm.~V.8.2]{Mac_Lane_1994}. As $\DCat$ is locally Cartesian closed, $s^*$ has a right adjoint $s_!$, hence we can consider $t_!s^*$. As $T = t_!s^*$ is the right adjoint of the monad $s_*t^*$, it is a comonad. Being a right adjoint, $T$ preserves limits.
-\end{proof}
-
-\begin{definition}\label{def:nilpotent_functor}
-    A functor $F$ is {\em nilpotent} if there exists $n \in \N$ such that the composed functor $F^n$ maps all objects to the terminal object.
-\end{definition}
-
-\begin{definition}\label{def:internal_quiver_bounded_depth}
-    Let $\DCat$ be a locally Cartesian closed category. An internal quiver
-    \begin{equation*}
-        s, t\colon E \rightrightarrows V
-    \end{equation*}
-    {\em has bounded depth} if there exists $n \in \N$ such that the iterated pullback
-    \begin{equation}\label{eq:nilpotent_left_adjoint}
-        \underbrace{E \times_V E \times_V \dots \times_V E}_{n \text{ factors}}
-    \end{equation}
-    is initial in $\DCat/V$.
-\end{definition}
-
-\begin{proposition}\label{prop:internal_quiver_functor}
-    Let $\DCat$ be a locally Cartesian closed category. Let $s, t\colon E \rightrightarrows V$ be an quiver of bounded depth. Then
-    \begin{equation*}
-        s_!t^*\colon \DCat/V \rightarrow \DCat/V
-    \end{equation*}
-    is a limit-preserving nilpotent functor.
-\end{proposition}
-
-\begin{proof}
-    The functor $s_!t^*$ is the right adjoint of the functor  $t_*s^*\colon \DCat/V \rightarrow \DCat/V$, hence it preserves limits and is therefore Cartesian. By~\cref{eq:nilpotent_left_adjoint}, $(t_*s^*)^n$ maps all objects to the initial object, so its adjoint $(s_!t^*)^n$ maps all objects to the terminal object.
-\end{proof}
-
-\section{Equivariant architectures}
-
-Let us now assume that $\DCat$  is a locally Cartesian closed category with a terminal object (and thus all finite limits).
-
-\begin{definition}\label{def:equivariance_category}
-    Let $M$ be a monoid in $\DCat$ and $I \in \Obj$. The {\em equivariance category} $\JCat_{M, I}$ is given by the projection maps
-    \begin{equation*}
-        s, t\colon M \times I \times I \rightrightarrows I,
-    \end{equation*}
-    with composition and identity given by composition and identity in $M$. The {\em equivariance comonad} is the comonad induced by this category via~\cref{prop:internal_category_comonad}, that is, $t_!s^*$.
-\end{definition}
-
-We introduce the notion of {\em nilpotent constraint}, which we will need in order to limit equivariance and connectivity. To do so, we need some additional definitions.
-
-\begin{definition}\label{def:nilpotent_architecture}
-    Let $\JCat_{M, I}$ be an equivariance category. A {\em nilpotence constraint} on $\JCat_{M, I}$ is a subobject $S \subseteq M \times I \times I$ such that the internal quiver induced by
-    \begin{equation*}
-        S \hookrightarrow M \times I \times I \rightrightarrows I
-    \end{equation*}
-    has bounded depth, as in~\cref{def:internal_quiver_bounded_depth}.
-\end{definition}
-% Let $\Cat$ be a Cartesian category, and let $T$ be a comonad on $\Cat$. A {\em nilpotent constraint} on $T$ is a nilpotent Cartesian endofunctor $F \colon \Cat \rightarrow \Cat$ together with a natural transformation $\eta \colon T \rightarrow F$.
-
-This is sufficient to give a notion of locality.
-
-
-
-\subsection{The category of coalgebras}
-
-Let $\Cat$ be a Cartesian closed category, and let $F\colon \Cat \rightarrow \Cat$ be a nilpotent architecture. We can consider $\FCoalg$, the category of coalgebras over $F$ \pietro{add ref}. Objects are simply maps
-\begin{equation*}
-    X \rightarrow F X,
-\end{equation*}
-where $X \in \Obj(\Cat)$. Morphisms are given by commutative diagrams
-\begin{equation*}
-    \begin{tikzcd}
-        X \arrow[rightarrow]{d} \arrow[rightarrow]{r}{\phi}
-        & Y \arrow[rightarrow]{d} \\
-        FX \arrow[rightarrow]{r}{F \phi}
-        & FY
-    \end{tikzcd}
-\end{equation*}
-As $F$ is Cartesian, the category $\FCoalg$ is also Cartesian, with products given by
-\begin{equation*}
-    \prod_{i \in I} X_i \rightarrow \prod_{i \in I} F X_i \simeq F \prod_{i \in I} X_i.
-\end{equation*}
-As $F$ is nilpotent and preserves finite products, it is straightforward to verify that the forgetful functor
-\begin{equation*}
-    U \colon \FCoalg \rightarrow \Cat
-\end{equation*}
-has a right adjoint $\Phi$, called the cofree functor, given by
-\begin{equation*}
-    \Phi(X) = X \times F X \times \dots \times F^{n-1} X \rightarrow F X \times \dots \times F^{n-1} X.
-\end{equation*}
+where the integral is taken over all composable pairs of morphisms $m1, m2$ \pietro{Un po' da capire cosa dobbiamo chiedere in termini di misurabilità etc}.
+We denote this algebra $\R[\JCat]$ and call it the {\em category measure algebra} of $\JCat$ \pietro{TODO reference! Cite normal category algebra}.
 
 \begin{remark}
-    This adjunction is comonadic \pietro{explain! cite Beck's theorem!}, and $\FCoalg$ is the Eilenberg-Moore category $\Cat^T$, where $T = U\Phi$.
+    When $\JCat$ is a category with only one object and all invertible morphisms, this is the familiar convolution of real-valued measures on a group.
 \end{remark}
 
-\section{Machines}
+\pietro{Forse qui sotto si può fare solo nel caso particolare, in fondo lo usiamo solo lì...}
+The algebra $\R[\JCat]$ acts on $C(C_1, \R)$ (space of continuous real-valued functions on $C_1$) to in the following way. Let $\mu \in \R[\JCat]$ and $u \in C(C_1, \R)$. Then we can define
+\begin{equation*}
+    (\mu u)(m_1) = \int \mu(m_2) u(m_1m_2) dm_2,
+\end{equation*}
+\pietro{E' un miracolo se tutte le azione sono nel verso giusto, un po' di cose saranno da girare.}
+% Let $S, D_1 \subseteq C_1$ be subspaces of morphisms. Then $D_n$ denote the subspace of compositions of $n$ composable morphisms in $D_1$. Let $\R[\JCat]_{D_1}$ the space of measures that have $0$ total variation on some $D_n$ and outside of $D_1$.
+For our applications, we will consider a special case of category, where $C_1 = M \times C_0 \times C_0$, with $M$ a measurable monoid. In that case, we have an action
+\begin{align*}
+    \R[\JCat] \times C(M \times C_0) &\rightarrow C(M \times C_0)\\
+    (\mu u)(m_2, s_2) &= \int \mu(m_1, s_1, s_2) u(m_2m_1, s_1) ds_1dm_1
+\end{align*}
+\pietro{ricontrolla gli indici sopra}
 
-\begin{definition}\label{def:machine}
-    Let $\Cat$ be a category, equipped with a terminal object $\pt$. Let $X \in \Obj(\Cat)$. A map
-    \begin{equation*}
-        \varrho \colon X \rightarrow X
-    \end{equation*}
-    is a {\em machine} if the induced transformation
-    \begin{equation*}
-        \Hom_\Cat(\pt, X) \rightarrow \Hom_\Cat(\pt, X)
-    \end{equation*}
-    has a unique fixed point $S_\varrho$, which we call the {\em stable state} of $\varrho$.
-\end{definition}
+% \section{Equivariant Volterra machine}
 
-\pietro{Fare qualche esempio, tipo contrazioni.}
+% One of the key reasons for the success of neural networks is the notion of {\em weight sharing}. In its simplest form, one can consider, given a (compactly-generated Hausdorff) topological monoid $M$ and a finite-dimensional vector space $X$, those continuous maps $C(M, X) \rightarrow C(M, X)$ that originate from maps $C(M, X) \rightarrow X$. Indeed, given
+% \begin{equation*}
+%     {\cal F} \colon C(M, X) \rightarrow X,
+% \end{equation*}
+% one can consider the map
+% \begin{align*}
+%     \widehat{\cal F} \colon C(M, X)       & \rightarrow C(M, X)              \\
+%     \left(\widehat{\cal F}\phi\right)(m) & = {\cal F}(a \mapsto \phi(am)).
+% \end{align*}
 
-\begin{definition}\label{def:parametric_machine}
-    Let $\Cat$ be a category with finite products. A {\em parametric machine} is simply a machine on the Kleisli category for the comonad $P \times \anon$, for some $P \in \Obj(\Cat)$. More explicitly, a map
-    \begin{equation*}
-        \varrho \colon P \times X \rightarrow X
-    \end{equation*}
-    is a {\em machine} if there exists a unique map $S_\varrho$ such that the following diagram commutes
-    \begin{equation}
-        \begin{tikzcd}[column sep=large]\label[diagram]{diag:machine_condition}
-            P \arrow[rightarrow]{r}{\left(\id, S_\varrho\right)}
-            \arrow[rightarrow,swap]{dr}{S_\varrho}
-            & P \times X \arrow[rightarrow]{d}{\varrho} \\
-            & X
-        \end{tikzcd}
-    \end{equation}
-\end{definition}
+% This simple notion of weight sharing does not seem sufficient to cover complex neural networks, made up of several nodes, each with their own symmetries, which interact with each other in non-trivial ways.
 
-\Cref{diag:machine_condition} is analogous to the machine condition in~\cite{2020arXiv200702777V} in the case when $X$ is an Abelian group and $\varrho\colon P \times X \rightarrow X$ is the sum of a map $P \rightarrow X$ and a map $X \rightarrow X$. This approach differs from the one taken in~\cite{2020arXiv200702777V}, in that here the object $P$ represents both input space and parameters. In what follows, we will show how to construct examples of {\em machines} using {\em nilpotent functors}.
+% We aim to show that a similar strategy is sufficient to recover, among other examples, classical recurrent and convolutional neural networks, incorporating at the same time equivariance and locality.
 
-\begin{theorem}\label{thm:nilpotent_architecture}
-    Let $F\colon \Cat \rightarrow \Cat$ be a nilpotent endofunctor. Let $\Phi X$ be a cofree coalgebra in $\FCoalg$. Let $P$ be a $F$ coalgebra. Then a map $P \times F X \rightarrow X$ induces a parametric machine $P \times \Phi X \rightarrow \Phi X$.
-\end{theorem}
+% Let $I$ be a measure space and $M$ be a measurable monoid equipped with a measure $\mu$.
 
-\begin{proof}
-    \pietro{TODO per induzione.}
-\end{proof}
+% \begin{definition}\label{def:cartesian_category}
+%     We say that a category is {\em Cartesian} if it has finite products. We say that a functor between Cartesian categories is {\em Cartesian} if it preserves finite products.
+% \end{definition}
 
-\pietro{La sfida principale qui è trovare un buona architettura $F$ ma anche una buona coalgebra $P$. Probabilmente da menzionare da qualche parte che se la categoria di base è buona, $\FCoalg$ ha molte buone proprietà.}
+% \pietro{TODO definisci anche locally Cartesian closed!}
 
-\section{Recurrent and convolutional neural networks}
+% \begin{proposition}\label{prop:internal_category_comonad}
+%     Let $\DCat$ be a locally Cartesian closed category. Then, there is a well defined notion of category {\em internal} to $\DCat$~\cite{mac2013categories}.
+%     Let $\JCat = s, t \colon C_1 \rightrightarrows C_0$ be such an internal category. $\JCat$ induces a limit-preserving comonad
+%     \begin{equation*}
+%         t_!s^*\colon \DCat/C_0 \rightrightarrows \DCat/C_0.
+%     \end{equation*}
+%     \pietro{TODO: definisci * e ! (base change functors).}
+% \end{proposition}
 
-\pietro{discuss shape of filter?}
+% \begin{proof}
+%     The map $s_*t^*\colon \DCat/C_0 \rightrightarrows \DCat/C_0$ is a monad~\cite[Thm.~V.8.2]{Mac_Lane_1994}. As $\DCat$ is locally Cartesian closed, $s^*$ has a right adjoint $s_!$, hence we can consider $t_!s^*$. As $T = t_!s^*$ is the right adjoint of the monad $s_*t^*$, it is a comonad. Being a right adjoint, $T$ preserves limits.
+% \end{proof}
 
-\section{Novel architectures}
+% \begin{definition}\label{def:nilpotent_functor}
+%     A functor $F$ is {\em nilpotent} if there exists $n \in \N$ such that the composed functor $F^n$ maps all objects to the terminal object.
+% \end{definition}
+
+% \begin{definition}\label{def:internal_quiver_bounded_depth}
+%     Let $\DCat$ be a locally Cartesian closed category. An internal quiver
+%     \begin{equation*}
+%         s, t\colon E \rightrightarrows V
+%     \end{equation*}
+%     {\em has bounded depth} if there exists $n \in \N$ such that the iterated pullback
+%     \begin{equation}\label{eq:nilpotent_left_adjoint}
+%         \underbrace{E \times_V E \times_V \dots \times_V E}_{n \text{ factors}}
+%     \end{equation}
+%     is initial in $\DCat/V$.
+% \end{definition}
+
+% \begin{proposition}\label{prop:internal_quiver_functor}
+%     Let $\DCat$ be a locally Cartesian closed category. Let $s, t\colon E \rightrightarrows V$ be an quiver of bounded depth. Then
+%     \begin{equation*}
+%         s_!t^*\colon \DCat/V \rightarrow \DCat/V
+%     \end{equation*}
+%     is a limit-preserving nilpotent functor.
+% \end{proposition}
+
+% \begin{proof}
+%     The functor $s_!t^*$ is the right adjoint of the functor  $t_*s^*\colon \DCat/V \rightarrow \DCat/V$, hence it preserves limits and is therefore Cartesian. By~\cref{eq:nilpotent_left_adjoint}, $(t_*s^*)^n$ maps all objects to the initial object, so its adjoint $(s_!t^*)^n$ maps all objects to the terminal object.
+% \end{proof}
+
+% \section{Equivariant architectures}
+
+% Let us now assume that $\DCat$  is a locally Cartesian closed category with a terminal object (and thus all finite limits).
+
+% \begin{definition}\label{def:equivariance_category}
+%     Let $M$ be a monoid in $\DCat$ and $I \in \Obj$. The {\em equivariance category} $\JCat_{M, I}$ is given by the projection maps
+%     \begin{equation*}
+%         s, t\colon M \times I \times I \rightrightarrows I,
+%     \end{equation*}
+%     with composition and identity given by composition and identity in $M$. The {\em equivariance comonad} is the comonad induced by this category via~\cref{prop:internal_category_comonad}, that is, $t_!s^*$.
+% \end{definition}
+
+% We introduce the notion of {\em nilpotent constraint}, which we will need in order to limit equivariance and connectivity. To do so, we need some additional definitions.
+
+% \begin{definition}\label{def:nilpotent_architecture}
+%     Let $\JCat_{M, I}$ be an equivariance category. A {\em nilpotence constraint} on $\JCat_{M, I}$ is a subobject $S \subseteq M \times I \times I$ such that the internal quiver induced by
+%     \begin{equation*}
+%         S \hookrightarrow M \times I \times I \rightrightarrows I
+%     \end{equation*}
+%     has bounded depth, as in~\cref{def:internal_quiver_bounded_depth}.
+% \end{definition}
+% % Let $\Cat$ be a Cartesian category, and let $T$ be a comonad on $\Cat$. A {\em nilpotent constraint} on $T$ is a nilpotent Cartesian endofunctor $F \colon \Cat \rightarrow \Cat$ together with a natural transformation $\eta \colon T \rightarrow F$.
+
+% This is sufficient to give a notion of locality.
+
+
+
+% \subsection{The category of coalgebras}
+
+% Let $\Cat$ be a Cartesian closed category, and let $F\colon \Cat \rightarrow \Cat$ be a nilpotent architecture. We can consider $\FCoalg$, the category of coalgebras over $F$ \pietro{add ref}. Objects are simply maps
+% \begin{equation*}
+%     X \rightarrow F X,
+% \end{equation*}
+% where $X \in \Obj(\Cat)$. Morphisms are given by commutative diagrams
+% \begin{equation*}
+%     \begin{tikzcd}
+%         X \arrow[rightarrow]{d} \arrow[rightarrow]{r}{\phi}
+%         & Y \arrow[rightarrow]{d} \\
+%         FX \arrow[rightarrow]{r}{F \phi}
+%         & FY
+%     \end{tikzcd}
+% \end{equation*}
+% As $F$ is Cartesian, the category $\FCoalg$ is also Cartesian, with products given by
+% \begin{equation*}
+%     \prod_{i \in I} X_i \rightarrow \prod_{i \in I} F X_i \simeq F \prod_{i \in I} X_i.
+% \end{equation*}
+% As $F$ is nilpotent and preserves finite products, it is straightforward to verify that the forgetful functor
+% \begin{equation*}
+%     U \colon \FCoalg \rightarrow \Cat
+% \end{equation*}
+% has a right adjoint $\Phi$, called the cofree functor, given by
+% \begin{equation*}
+%     \Phi(X) = X \times F X \times \dots \times F^{n-1} X \rightarrow F X \times \dots \times F^{n-1} X.
+% \end{equation*}
+
+% \begin{remark}
+%     This adjunction is comonadic \pietro{explain! cite Beck's theorem!}, and $\FCoalg$ is the Eilenberg-Moore category $\Cat^T$, where $T = U\Phi$.
+% \end{remark}
+
+% \section{Machines}
+
+% \begin{definition}\label{def:machine}
+%     Let $\Cat$ be a category, equipped with a terminal object $\pt$. Let $X \in \Obj(\Cat)$. A map
+%     \begin{equation*}
+%         \varrho \colon X \rightarrow X
+%     \end{equation*}
+%     is a {\em machine} if the induced transformation
+%     \begin{equation*}
+%         \Hom_\Cat(\pt, X) \rightarrow \Hom_\Cat(\pt, X)
+%     \end{equation*}
+%     has a unique fixed point $S_\varrho$, which we call the {\em stable state} of $\varrho$.
+% \end{definition}
+
+% \pietro{Fare qualche esempio, tipo contrazioni.}
+
+% \begin{definition}\label{def:parametric_machine}
+%     Let $\Cat$ be a category with finite products. A {\em parametric machine} is simply a machine on the Kleisli category for the comonad $P \times \anon$, for some $P \in \Obj(\Cat)$. More explicitly, a map
+%     \begin{equation*}
+%         \varrho \colon P \times X \rightarrow X
+%     \end{equation*}
+%     is a {\em machine} if there exists a unique map $S_\varrho$ such that the following diagram commutes
+%     \begin{equation}
+%         \begin{tikzcd}[column sep=large]\label[diagram]{diag:machine_condition}
+%             P \arrow[rightarrow]{r}{\left(\id, S_\varrho\right)}
+%             \arrow[rightarrow,swap]{dr}{S_\varrho}
+%             & P \times X \arrow[rightarrow]{d}{\varrho} \\
+%             & X
+%         \end{tikzcd}
+%     \end{equation}
+% \end{definition}
+
+% \Cref{diag:machine_condition} is analogous to the machine condition in~\cite{2020arXiv200702777V} in the case when $X$ is an Abelian group and $\varrho\colon P \times X \rightarrow X$ is the sum of a map $P \rightarrow X$ and a map $X \rightarrow X$. This approach differs from the one taken in~\cite{2020arXiv200702777V}, in that here the object $P$ represents both input space and parameters. In what follows, we will show how to construct examples of {\em machines} using {\em nilpotent functors}.
+
+% \begin{theorem}\label{thm:nilpotent_architecture}
+%     Let $F\colon \Cat \rightarrow \Cat$ be a nilpotent endofunctor. Let $\Phi X$ be a cofree coalgebra in $\FCoalg$. Let $P$ be a $F$ coalgebra. Then a map $P \times F X \rightarrow X$ induces a parametric machine $P \times \Phi X \rightarrow \Phi X$.
+% \end{theorem}
+
+% \begin{proof}
+%     \pietro{TODO per induzione.}
+% \end{proof}
+
+% \pietro{La sfida principale qui è trovare un buona architettura $F$ ma anche una buona coalgebra $P$. Probabilmente da menzionare da qualche parte che se la categoria di base è buona, $\FCoalg$ ha molte buone proprietà.}
+
+% \section{Recurrent and convolutional neural networks}
+
+% \pietro{discuss shape of filter?}
+
+% \section{Novel architectures}
 
 \bibliographystyle{abbrv}
 \bibliography{References}
